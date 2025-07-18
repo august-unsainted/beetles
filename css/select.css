@@ -1,0 +1,110 @@
+/* Основной контейнер поля выбора (когда не раскрыт) */
+.select2-selection.select2-selection--multiple {
+  border-radius: 0.375rem !important; /* Bootstrap border-radius-md */
+  /* Тень при фокусе, как у стандартных полей ввода Bootstrap */
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Bootstrap --bs-primary с прозрачностью */
+  border: 1px solid #ced4da !important; /* Стандартный цвет границы полей ввода Bootstrap */
+  padding: 0.75rem !important; /* Bootstrap padding-3 */
+  width: 260px; /* Сохранено из оригинала */
+  flex-direction: column;
+  min-height: 100% !important; /* Сохранено из оригинала */
+  max-height: 100%; /* Сохранено из оригинала */
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #fff !important; /* Белый фон */
+}
+
+/* Общие стили для элемента выбора множественного выбора */
+.select2-selection--multiple {
+  /* В данном случае, стили фона и границы уже определены более специфичным классом выше.
+     Этот блок можно оставить пустым или удалить, если нет других специфичных свойств. */
+  /* background-color: #fff !important; */
+  /* border: 1px solid #ced4da !important; */
+  border-radius: 0.375rem; /* Bootstrap border-radius-md */
+  /* padding: 4px 8px; */ /* Это может конфликтовать с основным padding: 0.75rem */
+}
+
+/* Цвет текста внутри поля выбора (плейсхолдер, текст выбранных элементов) */
+.select2-selection--multiple .select2-selection__rendered {
+  color: #212529 !important; /* Темный текст для светлой темы Bootstrap (--bs-body-color) */
+  line-height: 1.4;
+}
+
+/* Стрелка выпадающего списка */
+.select2-selection__arrow {
+  border-left: 1px solid #ced4da !important; /* Светлая граница */
+  background-color: transparent !important; /* Прозрачный фон, стрелка обычно SVG */
+}
+
+/* Контейнер с результатами (выпадающий список) */
+.select2-results__options {
+  background-color: #fff !important; /* Белый фон для выпадающего списка */
+  border: 1px solid #ced4da !important; /* Светлая граница */
+  margin-top: -1px; /* Для выравнивания с полем ввода */
+  min-height: 100%; /* Сохранено из оригинала */
+  max-height: 100%; /* Сохранено из оригинала */
+  overflow-y: auto;
+  border-radius: 0.375rem; /* Bootstrap border-radius-md */
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Стандартная тень выпадающих списков Bootstrap */
+}
+
+/* Отдельная опция в выпадающем списке */
+.select2-results__option {
+  padding: 0.375rem 0.75rem; /* Bootstrap padding-y/x-2 */
+  color: #212529 !important; /* Темный текст */
+}
+
+/* Выделенная опция (при наведении или навигации по стрелкам) */
+.select2-results__option--highlighted {
+  background-color: #cfe2ff !important; /* Очень светло-голубой, как Bootstrap --bs-primary-bg-subtle */
+  color: #0d6efd !important; /* Синий цвет Bootstrap Primary для выделенного текста */
+}
+
+/* Выбранная опция в
+выпадающем списке */
+.select2-results__option--selected {
+  background-color: #f8f9fa !important; /* Очень светло-серый, как Bootstrap --bs-light */
+  color: #212529 !important; /* Темный текст */
+}
+
+/* Выбранные "теги"/элементы внутри поля выбора */
+.select2-selection__choice {
+  background-color: #e2e6ea !important; /* Светло-серый фон для тегов, как Bootstrap --bs-secondary-bg-subtle */
+  color: #212529 !important; /* Темный текст */
+  border: 1px solid #d3d9df !important; /* Чуть более темная светло-серая граница */
+  padding: 0.25rem 0.6rem; /* Bootstrap padding-x-2 and padding-y-1 */
+  margin: 0.125rem 0.1875rem; /* Немного уменьшены отступы */
+  border-radius: 0.25rem; /* Bootstrap border-radius */
+}
+
+/* Кнопка удаления на выбранном теге */
+.select2-selection__choice__remove {
+  color: #6c757d !important; /* Серый цвет Bootstrap Secondary для иконок */
+  margin-left: 0.375rem; /* Небольшой отступ от текста тега */
+}
+
+.select2-selection__choice__remove:hover {
+  color: #dc3545 !important; /* Красный цвет Bootstrap Danger при наведении (типично для кнопок удаления) */
+}
+
+/* Контейнер Select2 */
+.select2-container {
+  height: 100%; /* Сохранено из оригинала */
+  flex: 1 0 0; /* Сохранено из оригинала */
+  max-height: 230px; /* Сохранено из оригинала */
+}
+
+/* Z-index для выпадающего списка */
+.select2-dropdown--below {
+  z-index: 10000 !important; /* Стандартный z-index для модальных окон/выпадающих списков Bootstrap */
+}
+
+/* гриды */
+.gridjs-th {
+  padding: 6px !important;
+}
+
+.highlight-column {
+  background-color: rgba(255, 235, 59, 0.3) !important;
+  transition: background-color 0.2s;
+}
