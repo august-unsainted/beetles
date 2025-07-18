@@ -80,7 +80,7 @@
 /* Кнопка удаления на выбранном теге */
 .select2-selection__choice__remove {
   color: #6c757d !important; /* Серый цвет Bootstrap Secondary для иконок */
-  margin-left: 0.375rem; /* Небольшой отступ от текста тега */
+  margin-left: 0; /* Небольшой отступ от текста тега */
 }
 
 .select2-selection__choice__remove:hover {
@@ -96,7 +96,7 @@
 
 /* Z-index для выпадающего списка */
 .select2-dropdown--below {
-  z-index: 10000 !important; /* Стандартный z-index для модальных окон/выпадающих списков Bootstrap */
+  z-index: 15000 !important; /* Стандартный z-index для модальных окон/выпадающих списков Bootstrap */
 }
 
 /* гриды */

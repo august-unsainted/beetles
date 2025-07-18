@@ -20,6 +20,36 @@ class TableManager {
 
   initSelect2() {
     $('.multiple-select').select2({ placeholder: 'Выберите опции' });
+    $('.multiple-select').on('select2:unselect', function (e) {
+      let id = this.id;
+      let region;
+      let modal = id.split('_')[0]
+      let $points = $(`#${modal}_points`);
+      if (id.endsWith('regions')) {
+        region = e.params.data.id;
+        let values = $points.val();
+        $.each($points.find(`option[data-region="${region}"]`), (_, option) => {
+          if ($(option).attr('data-select2-id')) {
+            values.splice(values.indexOf(option.value), 1)
+          }
+        })
+        $points.val(values).trigger('change')
+      } else {
+        region = $(e.params.data.element).attr('data-region')
+        let options = $points.val();
+        let region_options = [];
+        $.each($points.find(`option[data-region="${region}"]`), (_, option) => {
+          if (options.includes(option.value)) {
+            region_options.push(option)
+          }
+        })
+        if (region_options.length == 0) {
+          let regions = $(`#${modal}_regions`).val();
+          regions.splice(regions.indexOf(region), 1)
+          $(`#${modal}_regions`).val(regions).trigger('change')
+        }
+      }
+    })
   }
 
   syncColumnsState({ to = 'checkboxes' } = {}) {
@@ -76,7 +106,7 @@ class TableManager {
     for (let i = 0; i < allColumns.length; i++) {
       let column = allColumns[i];
       let isHidden = (type == 'geo' && ecoColumns.includes(column)) ||
-          (type == 'eco' && geoColumns.includes(column));
+        (type == 'eco' && geoColumns.includes(column));
       columnsConfig.push({
         name: column[0], id: column[1], visible: !isHidden,
       });

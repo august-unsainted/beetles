@@ -6,7 +6,7 @@ function get_table($where = ''): string
     global $link;
     $query = $query = "SELECT f.name as 'Подсемейство', t.name as 'Триба', g.name as 'Род', sg.name as 'Подрод', s.name as 'Вид', 
     GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(r.name, ' район', 1) SEPARATOR ', ') as 'Районы', GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(p.name, ' [', 1), ', ', 1) SEPARATOR ', ') as 'Пункты_сбора',
-    w.full_name as 'Широтная_группа', l.full_name as 'Долготная_группа', e.name as 'Экологическая_группа', tr.name as 'Трофическая_группа', ti.name as 'Ярусная_группа'
+    w.name as 'Широтная_группа', l.name as 'Долготная_группа', e.name as 'Экологическая_группа', tr.name as 'Трофическая_группа', ti.name as 'Ярусная_группа'
     FROM species s
     left join subgenus sg on sg.id = s.genus
     left join genus g on g.id = s.genus
@@ -40,7 +40,8 @@ function get_table($where = ''): string
 function get_select($id, $table, $multiple = false): string
 {
     global $link;
-    $result = mysqli_query($link, "SELECT * from $table");
+    $query = $table == 'points' ? "SELECT DISTINCT id, SUBSTRING_INDEX(SUBSTRING_INDEX(name, ' [', 1), ', ', 1), region FROM points" : "SELECT * from $table";
+    $result = mysqli_query($link, $query);
     $values = mysqli_fetch_all($result);
     $classes = "form-select form-select-sm";
     $name = $table;
@@ -51,7 +52,8 @@ function get_select($id, $table, $multiple = false): string
     }
     $result = "<select class='$classes' name='$name' id='$id' " . ($multiple_str ?? '') . ">";
     foreach ($values as $value) {
-        $result .= "<option value='$value[0]'>$value[1]</option>";
+        $extra = $table == 'points' ? "data-region='$value[2]'" : '';
+        $result .= "<option name='$value[1]' value='$value[0]' $extra>$value[1]</option>";
     }
     $result .= "</select>";
     return $result;
@@ -63,7 +65,8 @@ function get_selects($modal, $selects, $multiple = false): string
     foreach ($selects as $field => $label) {
         $id = $modal . '_' . $field;
         $select = get_select($id, $field, $multiple);
-        $result .= "<div class='col-md-6'><label for='$id' class='form-label fw-medium'>$label</label>$select</div>";
+        $flex = $multiple ? "d-flex flex-column" : '';
+        $result .= "<div class='col-md-6 $flex'><label for='$id' class='form-label fw-medium'>$label</label>$select</div>";
     }
     return $result;
 }
@@ -77,11 +80,14 @@ function get_form($name): string
                 <label for='$id' class='form-label fw-medium'>Вид</label>
                 <input type='text' class='form-control form-control-sm' id='$id' name='species'>
                 </div>";
+    $eco_selects = get_selects($name, ['width_ranges' => 'Широтная группа ареала', 'long_ranges' => 'Долготная группа ареала', 
+    'ecologic_groups' => 'Экологическая группа', 'trophic_groups' => 'Трофическая группа', 'tiered_groups' => 'Ярусная группа']);
     $multiple_selects = get_selects($name, ['regions' => 'Районы сбора', 'points' => 'Точки сбора'], true);
     $form = "<div class='modal-body'>
                 <form id='$name" . "Form'>
                     <div class='row g-3'>
                         $selects
+                        $eco_selects
                         $inputs
                         $multiple_selects
                         <div class='col-12'>

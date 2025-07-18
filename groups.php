@@ -108,24 +108,24 @@ require_once('php/utils.php');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/TableManager.js"></script>
     <script>
-        const manager = new TableManager('eco');
+        const manager = new TableManager('geo');
         $(document).ready(() => manager.init());
 
         function populateModalSelects(modalId, currentBeetleData = []) {
-            let names = ['families', 'tribes', 'genus', 'subgenus', 'species', 'width_range', 'long_range', '', 'trophic_group', 'regions', 'points', 'description']
+            let names = ['families', 'tribes', 'genus', 'subgenus', 'species', 'regions', 'points', 'width_range', 'long_range', 'ecologic_group', 'trophic_group', 'description']
             for (let i = 0; i < names.length - 1; i++) {
                 let name = names[i];
-                let id = modalId + "_" + name
-                let value = currentBeetleData[i + 1]
-                if (['regions', 'points'].includes(name)) {
-                    console.log(value)
-                    $.each(value.split(", "), function(index, element){
-                        $(`#${id} option[value='${element}']`).prop("selected", true);
+                let id = '#' + modalId + "_" + name
+                let value = currentBeetleData[i]
+                if (['families', 'tribes', 'genus', 'subgenus', 'regions', 'points'].includes(name)) {
+                    let options = [];
+                    value.split(", ").map(element => {
+                        if (name == 'regions' && element != 'Улан-Удэ') element += ' район';
+                        options.push($(`option[name="${element}"]`).val());
                     });
-                    $('#' + id).trigger('input');
-                } else {
-                    $(id).val(value)
+                    value = options;
                 }
+                $(id).val(value).trigger('change');
             }
         }
 
