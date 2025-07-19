@@ -4,11 +4,11 @@ require_once('connect_db.php');
 function get_table($where = ''): string
 {
     global $link;
-    $query = $query = "SELECT f.name as 'Подсемейство', t.name as 'Триба', g.name as 'Род', sg.name as 'Подрод', s.name as 'Вид', 
+    $query = "SELECT s.id as 'ID', f.name as 'Подсемейство', t.name as 'Триба', g.name as 'Род', sg.name as 'Подрод', s.name as 'Вид',
     GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(r.name, ' район', 1) SEPARATOR ', ') as 'Районы', GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(p.name, ' [', 1), ', ', 1) SEPARATOR ', ') as 'Пункты_сбора',
-    w.name as 'Широтная_группа', l.name as 'Долготная_группа', e.name as 'Экологическая_группа', tr.name as 'Трофическая_группа', ti.name as 'Ярусная_группа'
+    w.name as 'Широтная_группа', l.name as 'Долготная_группа', e.name as 'Экологическая_группа', tr.name as 'Трофическая_группа', ti.name as 'Ярусная_группа', s.description as 'Распространение'
     FROM species s
-    left join subgenus sg on sg.id = s.genus
+    left join subgenus sg on sg.id = s.subgenus
     left join genus g on g.id = s.genus
     left join tribes t on t.id = g.triba
     left join families f on f.id = t.family
@@ -52,7 +52,13 @@ function get_select($id, $table, $multiple = false): string
     }
     $result = "<select class='$classes' name='$name' id='$id' " . ($multiple_str ?? '') . ">";
     foreach ($values as $value) {
-        $extra = $table == 'points' ? "data-region='$value[2]'" : '';
+        if ($table == 'points') {
+            $extra = "data-region='$value[2]'"; 
+        } elseif ($table == 'subgenus') {
+            $extra = "data-genus='$value[2]'";
+        } else {
+            $extra = '';
+        }
         $result .= "<option name='$value[1]' value='$value[0]' $extra>$value[1]</option>";
     }
     $result .= "</select>";
@@ -73,31 +79,33 @@ function get_selects($modal, $selects, $multiple = false): string
 
 function get_form($name): string
 {
-    $selects = get_selects($name, ["families" => 'Подсемейство', "tribes" => 'Триба', "genus" => 'Род', 'subgenus' => 'Подрод']);
-    $id = $name . '_species';
+    $selects = get_selects($name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
+    $id = $name . '_name';
     $inputs = "<input hidden id='$name" . "_id' name='id'>
                 <div class='col-md-6'>
                 <label for='$id' class='form-label fw-medium'>Вид</label>
-                <input type='text' class='form-control form-control-sm' id='$id' name='species'>
+                <input type='text' class='form-control form-control-sm' id='$id' name='name'>
                 </div>";
     $eco_selects = get_selects($name, ['width_ranges' => 'Широтная группа ареала', 'long_ranges' => 'Долготная группа ареала', 
     'ecologic_groups' => 'Экологическая группа', 'trophic_groups' => 'Трофическая группа', 'tiered_groups' => 'Ярусная группа']);
     $multiple_selects = get_selects($name, ['regions' => 'Районы сбора', 'points' => 'Точки сбора'], true);
-    $form = "<div class='modal-body'>
-                <form id='$name" . "Form'>
+    $desc_id = $name . "_description";
+    $action = $name == 'edit' ? 'edit' : 'create';
+    return "<div class='modal-body'>
+                <form id='$name" . "_form' method='post' action='php/$action.php'>
                     <div class='row g-3'>
                         $selects
-                        $eco_selects
                         $inputs
+                        $eco_selects
                         $multiple_selects
                         <div class='col-12'>
-                            <label for='modalNotes' class='form-label fw-medium'>Примечание</label>
-                            <textarea class='form-control form-control-sm' name='description' id='modalNotes'
+                            <label for='$desc_id' class='form-label fw-medium'>Распространение</label>
+                            <textarea class='form-control form-control-sm' name='description' id='$desc_id'
                                 rows='3'></textarea>
                         </div>
                     </div>
+                    <input hidden name='action'>
                 </form>
             </div>";
-    return $form;
 }
 ?>

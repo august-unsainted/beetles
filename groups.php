@@ -75,9 +75,10 @@ require_once('php/utils.php');
                 </div>
                 <?= get_form("edit") ?>
                 <div class="modal-footer">
-                    <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm">Удалить</button>
+                    <button type="button" name="delete" onclick="submitForm()"
+                        class="btn btn-danger btn-sm">Удалить</button>
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="submit" name="action" value="apply" class="btn btn-primary btn-sm">Сохранить
+                    <button type="button" name="apply" onclick="submitForm()" class="btn btn-primary btn-sm">Сохранить
                         изменения</button>
                 </div>
             </div>
@@ -110,39 +111,6 @@ require_once('php/utils.php');
     <script>
         const manager = new TableManager('geo');
         $(document).ready(() => manager.init());
-
-        function populateModalSelects(modalId, currentBeetleData = []) {
-            let names = ['families', 'tribes', 'genus', 'subgenus', 'species', 'regions', 'points', 'width_range', 'long_range', 'ecologic_group', 'trophic_group', 'description']
-            for (let i = 0; i < names.length - 1; i++) {
-                let name = names[i];
-                let id = '#' + modalId + "_" + name
-                let value = currentBeetleData[i]
-                if (['families', 'tribes', 'genus', 'subgenus', 'regions', 'points'].includes(name)) {
-                    let options = [];
-                    value.split(", ").map(element => {
-                        if (name == 'regions' && element != 'Улан-Удэ') element += ' район';
-                        options.push($(`option[name="${element}"]`).val());
-                    });
-                    value = options;
-                }
-                $(id).val(value).trigger('change');
-            }
-        }
-
-        // Обработчик открытия модального окна редактирования
-        const detailsModal = document.getElementById('detailsModal');
-        detailsModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const rowIndex = button.getAttribute('data-row-index');
-            const beetle = manager.beetles[rowIndex];
-
-            $('#edit_id').val(rowIndex);
-            populateModalSelects('edit', beetle);
-            $('#edit_species').val(beetle[4]);
-            $('#edit_description').val(beetle[6] || '');
-            originalBeetleData = [...beetle];
-            hasUnsavedChanges = false;
-        });
     </script>
 
 </body>

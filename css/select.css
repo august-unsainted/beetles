@@ -5,7 +5,6 @@
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Bootstrap --bs-primary с прозрачностью */
   border: 1px solid #ced4da !important; /* Стандартный цвет границы полей ввода Bootstrap */
   padding: 0.75rem !important; /* Bootstrap padding-3 */
-  width: 260px; /* Сохранено из оригинала */
   flex-direction: column;
   min-height: 100% !important; /* Сохранено из оригинала */
   max-height: 100%; /* Сохранено из оригинала */
@@ -75,6 +74,7 @@
   padding: 0.25rem 0.6rem; /* Bootstrap padding-x-2 and padding-y-1 */
   margin: 0.125rem 0.1875rem; /* Немного уменьшены отступы */
   border-radius: 0.25rem; /* Bootstrap border-radius */
+  font-size: 14px;
 }
 
 /* Кнопка удаления на выбранном теге */

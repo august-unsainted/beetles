@@ -16,40 +16,52 @@ class TableManager {
     this.bindEvents();
     this.bindToggleAllSwitch();
     this.bindHighlightColumns();
+    this.bindModalEvents();
   }
 
   initSelect2() {
-    $('.multiple-select').select2({ placeholder: 'Выберите опции' });
-    $('.multiple-select').on('select2:unselect', function (e) {
-      let id = this.id;
-      let region;
-      let modal = id.split('_')[0]
-      let $points = $(`#${modal}_points`);
-      if (id.endsWith('regions')) {
-        region = e.params.data.id;
-        let values = $points.val();
-        $.each($points.find(`option[data-region="${region}"]`), (_, option) => {
-          if ($(option).attr('data-select2-id')) {
-            values.splice(values.indexOf(option.value), 1)
+    $('.multiple-select')
+      .select2({ placeholder: 'Выберите опции' })
+      .on('select2:unselect', function (e) {
+        let id = this.id;
+        const isRegions = id.endsWith('regions');
+        const modal = id.split('_')[0];
+        const $points = $(`#${modal}_points`);
+        const pointsValues = $points.val();
+        const region = isRegions
+          ? e.params.data.id
+          : $(e.params.data.element).attr('data-region');
+
+        let regionOptions = [];
+
+        $points.find(`option[data-region="${region}"]`).each((_, option) => {
+          if (pointsValues.includes(option.value)) {
+            isRegions
+              ? pointsValues.splice(pointsValues.indexOf(option.value), 1)
+              : regionOptions.push(option);
           }
-        })
-        $points.val(values).trigger('change')
-      } else {
-        region = $(e.params.data.element).attr('data-region')
-        let options = $points.val();
-        let region_options = [];
-        $.each($points.find(`option[data-region="${region}"]`), (_, option) => {
-          if (options.includes(option.value)) {
-            region_options.push(option)
-          }
-        })
-        if (region_options.length == 0) {
-          let regions = $(`#${modal}_regions`).val();
-          regions.splice(regions.indexOf(region), 1)
-          $(`#${modal}_regions`).val(regions).trigger('change')
+        });
+
+        if (isRegions) {
+          $points.val(pointsValues).trigger('change');
+        } else if (!regionOptions.length) {
+          const regions = $(`#${modal}_regions`).val();
+          regions.splice(regions.indexOf(region), 1);
+          $(`#${modal}_regions`).val(regions).trigger('change');
         }
-      }
-    })
+      })
+      .on('select2:select', function (e) {
+        if (this.id.endsWith('points')) {
+          const modal = this.id.split('_')[0];
+          const $regions = $(`#${modal}_regions`);
+          const region = $(e.params.data.element).attr('data-region');
+          let selectedRegions = $regions.val();
+          if (!selectedRegions.includes(region)) {
+            selectedRegions.push(region);
+            $regions.val(selectedRegions).trigger('change');
+          }
+        }
+      });
   }
 
   syncColumnsState({ to = 'checkboxes' } = {}) {
@@ -84,11 +96,12 @@ class TableManager {
   getColumns(type) {
     let columnsConfig = [];
     let baseColumns = [
+      ['ID', 'id'],
       ['Подсемейство', 'family'],
       ['Триба', 'tribe'],
       ['Род', 'genus'],
       ['Подрод', 'subgenus'],
-      ['Вид', 'species'],
+      ['Вид', 'name'],
     ];
     let geoColumns = [
       ['Районы', 'region'],
@@ -105,12 +118,21 @@ class TableManager {
 
     for (let i = 0; i < allColumns.length; i++) {
       let column = allColumns[i];
-      let isHidden = (type == 'geo' && ecoColumns.includes(column)) ||
-        (type == 'eco' && geoColumns.includes(column));
+      let isHidden =
+        (type == 'geo' && ecoColumns.includes(column)) ||
+        (type == 'eco' && geoColumns.includes(column)) ||
+        column[0] == 'ID';
       columnsConfig.push({
-        name: column[0], id: column[1], visible: !isHidden,
+        name: column[0],
+        id: column[1],
+        visible: !isHidden,
       });
     }
+    columnsConfig.push({
+      name: 'Распространение',
+      id: 'description',
+      visible: false,
+    });
     columnsConfig.push({
       name: 'Действия',
       sort: false,
@@ -118,11 +140,7 @@ class TableManager {
       formatter: (_, row) => {
         const originalRowData = row.cells.map((c) => c.data);
         const rowIndex = this.beetles.findIndex(
-          (b) =>
-            b[0] === originalRowData[0] &&
-            b[1] === originalRowData[1] &&
-            b[2] === originalRowData[2] &&
-            b[3] === originalRowData[3]
+          (b) => b[0] === originalRowData[0]
         );
         return gridjs.html(
           `<button class="btn btn-secondary btn-sm view-details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-row-index="${rowIndex}">Подробнее</button>`
@@ -153,7 +171,7 @@ class TableManager {
       document.querySelector('.gridjs-search input')?.value || '';
 
     const { columns, data } = this.getFiltered();
-
+    let table = document.getElementById('data_table');
     if (!this.grid) {
       this.grid = new gridjs.Grid({
         columns,
@@ -245,4 +263,69 @@ class TableManager {
       }
     });
   }
+
+  bindModalEvents() {
+    $('#detailsModal').on('show.bs.modal', function (e) {
+      const button = e.relatedTarget;
+      const rowIndex = $(button).attr('data-row-index');
+      const beetle = manager.beetles[rowIndex];
+      let names = [
+        'id',
+        'families',
+        'tribes',
+        'genus',
+        'subgenus',
+        'name',
+        'regions',
+        'points',
+        'width_ranges',
+        'long_ranges',
+        'ecologic_groups',
+        'trophic_groups',
+        'tiered_groups',
+        'description',
+      ];
+      for (let i = 0; i < names.length; i++) {
+        let name = names[i];
+        let id = '#edit_' + name;
+        let value = beetle[i];
+        if (!['id', 'name', 'description'].includes(name) && value != '') {
+          let options = [];
+          value.split(', ').map((element) => {
+            if (name == 'regions' && element != 'Улан-Удэ') element += ' район';
+            options.push($(`${id} option[name="${element}"]`).val());
+          });
+          value = options;
+        }
+        $(id).val(value).trigger('change');
+      }
+    });
+
+    $('#edit_genus, #new_genus').change(function (e) {
+      const modal = this.id.split('_')[0];
+      $(`#${modal}_subgenus`).val('');
+    });
+
+    $('#edit_subgenus, #new_subgenus').change(function (e) {
+      const modal = this.id.split('_')[0];
+      const selectedOption = $(this).find(`option[value="${this.value}"]`)[0];
+      if (selectedOption) {
+        const genus = selectedOption.getAttribute('data-genus');
+        if (genus) $(`#${modal}_genus`).val(genus);
+      }
+    });
+
+    $('#createBeetleModal').on('show.bs.modal', function (e) {
+      $.each($('#new_form').find('input, select, textarea'), function (_, element) {
+        $(element).val('')
+      })
+    })
+  }
+}
+
+function submitForm() {
+  const button = event.target;
+  const form = $(button).parent().parent().find('form')[0];
+  $(form.action).val(button.name);
+  $(form).trigger('submit');
 }
