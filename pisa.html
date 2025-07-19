@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивная таблица жужелиц</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <style>
+        /* Select2 стили для интеграции с Bootstrap */
+        .select2-container--default .select2-selection--multiple {
+          border: 1px solid #ced4da;
+          border-radius: 0.375rem;
+          background-color: #fff;
+          transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .select2-container {
+          width: 100% !important;
+        }
+
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+          border-color: #86b7fe;
+          box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+          background-color: #e9ecef;
+          border: 1px solid #adb5bd;
+          border-radius: 0.25rem;
+          color: #495057;
+          transition: background-color 0.15s ease-in-out;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+          background-color: #dee2e6;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+          color: #6c757d;
+          transition: color 0.15s ease-in-out;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+          color: #dc3545;
+        }
+
+        .select2-dropdown {
+          border: 1px solid #ced4da;
+          border-radius: 0.375rem;
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+          z-index: 15000;
+        }
+
+        .select2-results__option {
+          transition: background-color 0.15s ease-in-out;
+        }
+
+        .select2-results__option--highlighted {
+          background-color: #0d6efd !important;
+          color: #fff;
+        }
+
+        .select2-results__option--selected {
+          background-color: #f8f9fa;
+          color: #495057;
+        }
+
+        .select2-selection__choice__remove > span {
+          padding-bottom: 6px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+          padding-left: 6px;
+          padding-right: 10px;
+        }
+
+        /* Стили таблицы */
+        .gridjs-th {
+          padding: 6px !important;
+        }
+
+        .highlight-column {
+          background-color: rgba(255, 235, 59, 0.3) !important;
+          transition: background-color 0.2s;
+        }
+
+
+
+        /* Компактность модалки */
+        .modal-body {
+          padding: 0.75rem 1rem;
+        }
+
+        .modal-body .row {
+          margin-bottom: 0.5rem;
+        }
+
+        .modal-body .form-label {
+          margin-bottom: 0.15rem;
+          font-size: 0.8rem;
+          font-weight: 500;
+          color: #212529;
+        }
+
+        .modal-body .form-control, .modal-body .form-select {
+          font-size: 0.8rem;
+          padding: 0.25rem 0.5rem;
+          height: auto;
+        }
+
+        .modal-body h6 {
+          font-size: 0.875rem;
+          margin-bottom: 0.375rem;
+          margin-top: 0.75rem;
+        }
+
+        .modal-body h6:first-child {
+          margin-top: 0;
+        }
+
+        .modal-body textarea {
+          resize: none;
+        }
+
+
+
+        .toggle-geography, .toggle-images {
+          cursor: pointer;
+          color: #0d6efd;
+          text-decoration: underline;
+          font-size: 0.8rem;
+        }
+
+        .toggle-geography:hover, .toggle-images:hover {
+          color: #0a58ca;
+        }
+
+        .modal-section {
+          background-color: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 0.375rem;
+          padding: 0.75rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .modal-section h6 {
+          color: #495057;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          margin-top: 0;
+          font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid py-4 px-3">
+        <div class="card border-0">
+            <div class="card-body">
+                <section class="mb-4">
+                    <div class="d-flex flex-column flex-md-row px-0 justify-content-between align-items-start gap-3 w-100">
+                        <div class="w-100 w-md-50">
+                            <h1 class="fw-bold text-primary mb-3">Интерактивная таблица жужелиц</h1>
+                            <button type="button" class="btn btn-primary w-100 w-md-auto" style="min-width: 180px;"
+                                data-bs-toggle="modal" data-bs-target="#createBeetleModal">
+                                + Создать жужелицу
+                            </button>
+                        </div>
+                        <fieldset class="w-100 w-md-50" style="min-width: 260px;">
+                            <legend class="fs-6 text-muted mb-2">Признаки</legend>
+                            <div class="d-flex flex-wrap gap-2" id="chooseColumns">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="toggleAllColumns" checked>
+                                    <label class="form-check-label" for="toggleAllColumns">
+                                        <strong>Все признаки</strong>
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </section>
+
+                <div style="display: none;">
+                    <table id="data_table">
+                        <tbody>
+                            <tr><td>Подсемейство 1</td><td>Триба 1</td><td>Род 1</td><td>Подрод 1</td><td>Вид 1</td><td>Район 1</td><td>Пункт 1</td><td>Широтная 1</td><td>Долготная 1</td><td>Эко группа 1</td><td>Трофическая 1</td><td>Ярусная 1</td><td>Описание 1</td></tr>
+                            <tr><td>Подсемейство 2</td><td>Триба 2</td><td>Род 2</td><td>Подрод 2</td><td>Вид 2</td><td>Район 2</td><td>Пункт 2</td><td>Широтная 2</td><td>Долготная 2</td><td>Эко группа 2</td><td>Трофическая 2</td><td>Ярусная 2</td><td>Описание 2</td></tr>
+                            <tr><td>Подсемейство 3</td><td>Триба 3</td><td>Род 3</td><td>Подрод 3</td><td>Вид 3</td><td>Район 3</td><td>Пункт 3</td><td>Широтная 3</td><td>Долготная 3</td><td>Эко группа 3</td><td>Трофическая 3</td><td>Ярусная 3</td><td>Описание 3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="table-wrapper" class="rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Детали жужелицы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="edit_id" name="id">
+
+                        <div class="modal-section">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0" style="color: black;">Изображения</h6>
+                                <span class="toggle-images" title="Показать/скрыть управление изображениями">
+                                    показать
+                                </span>
+                            </div>
+                            <div class="row" id="images-section" style="display: none;">
+                                <div class="col-12">
+                                    <input type="file" class="form-control" id="edit_image" accept="image/*" style="display: none;">
+                                    <div class="mb-2" id="image-preview">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zNWVtIj7QndC10YIg0LjQt9C+0LHRgNCw0LbQtdC90LjRjzwvdGV4dD4KICA8L3N2Zz4K" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                                    </div>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="$('#edit_image').click()">Установить</button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="delete-image">Удалить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section">
+                            <h6 style="color: black;">Таксономия</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Род</label>
+                                    <input type="text" class="form-control" id="edit_genus" list="genus-list" placeholder="Выберите род">
+                                    <datalist id="genus-list">
+                                        <option value="Род 1">
+                                        <option value="Род 2">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Подрод</label>
+                                    <input type="text" class="form-control" id="edit_subgenus" list="subgenus-list" placeholder="Выберите подрод">
+                                    <datalist id="subgenus-list">
+                                        <option value="Подрод 1">
+                                        <option value="Подрод 2">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Вид</label>
+                                    <input type="text" class="form-control" id="edit_species">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0" style="color: black;">География</h6>
+                                <span class="toggle-geography" title="Показать/скрыть поля географии">
+                                    показать
+                                </span>
+                            </div>
+                            <div class="row" id="geography-section">
+                                <div class="col-md-6">
+                                    <label class="form-label">Регионы</label>
+                                    <select class="form-control multiple-select" id="edit_regions" multiple>
+                                        <option value="1">Баргузинский район</option>
+                                        <option value="2">Бичурский район</option>
+                                        <option value="3">Джидинский район</option>
+                                        <option value="4">Заиграевский район</option>
+                                        <option value="5">Закаменский район</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Точки</label>
+                                    <select class="form-control multiple-select" id="edit_points" multiple>
+                                        <option value="1" data-region="1">Усть-Баргузин</option>
+                                        <option value="2" data-region="1">Баргузин</option>
+                                        <option value="3" data-region="2">Бичура</option>
+                                        <option value="4" data-region="2">Новосретенское</option>
+                                        <option value="5" data-region="3">Петропавловка</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section">
+                            <h6 style="color: black;">Экологические группы</h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Широтная группа</label>
+                                    <input type="text" class="form-control" id="edit_width_range" list="width-list" placeholder="Выберите группу">
+                                    <datalist id="width-list">
+                                        <option value="Широкая">
+                                        <option value="Узкая">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Долготная группа</label>
+                                    <input type="text" class="form-control" id="edit_long_range" list="long-list" placeholder="Выберите группу">
+                                    <datalist id="long-list">
+                                        <option value="Длинная">
+                                        <option value="Короткая">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Экологическая группа</label>
+                                    <input type="text" class="form-control" id="edit_ecologic_group" list="ecologic-list" placeholder="Выберите группу">
+                                    <datalist id="ecologic-list">
+                                        <option value="Лесная">
+                                        <option value="Степная">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Трофическая группа</label>
+                                    <input type="text" class="form-control" id="edit_trophic_group" list="trophic-list" placeholder="Выберите группу">
+                                    <datalist id="trophic-list">
+                                        <option value="Хищник">
+                                        <option value="Травоядный">
+                                    </datalist>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section">
+                            <h6 style="color: black;">Описание</h6>
+                            <div class="row">
+                                <div class="col-12">
+                                    <textarea class="form-control" id="edit_description" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" name="delete" onclick="submitForm()" class="btn btn-danger btn-sm me-auto">Удалить</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" name="apply" onclick="submitForm()" class="btn btn-primary btn-sm">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createBeetleModal" tabindex="-1" aria-labelledby="createBeetleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createBeetleModalLabel">Создать новую жужелицу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createForm">
+                        <div class="modal-section">
+                            <h6>Таксономия</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Род</label>
+                                    <select class="form-control" id="create_genus">
+                                        <option value="">Выберите род</option>
+                                        <option value="Род 1">Род 1</option>
+                                        <option value="Род 2">Род 2</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Подрод</label>
+                                    <select class="form-control" id="create_subgenus">
+                                        <option value="">Выберите подрод</option>
+                                        <option value="Подрод 1">Подрод 1</option>
+                                        <option value="Подрод 2">Подрод 2</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Вид</label>
+                                    <input type="text" class="form-control" id="create_species">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-section-divider">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0 text-muted">География</h6>
+                                <button type="button" class="btn btn-sm btn-outline-secondary toggle-geography" title="Показать/скрыть поля географии">
+                                    👁️
+                                </button>
+                            </div>
+                            <div class="row mb-3" id="geography-section-create">
+                                <div class="col-md-6">
+                                    <label class="form-label">Регионы</label>
+                                    <select class="form-control multiple-select" id="create_regions" multiple>
+                                        <option value="1">Баргузинский район</option>
+                                        <option value="2">Бичурский район</option>
+                                        <option value="3">Джидинский район</option>
+                                        <option value="4">Заиграевский район</option>
+                                        <option value="5">Закаменский район</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Точки</label>
+                                    <select class="form-control multiple-select" id="create_points" multiple>
+                                        <option value="1" data-region="1">Усть-Баргузин</option>
+                                        <option value="2" data-region="1">Баргузин</option>
+                                        <option value="3" data-region="2">Бичура</option>
+                                        <option value="4" data-region="2">Новосретенское</option>
+                                        <option value="5" data-region="3">Петропавловка</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-2 text-muted">Экологические группы</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Широтная группа</label>
+                                <select class="form-control" id="create_width_range">
+                                    <option value="">Выберите группу</option>
+                                    <option value="Широкая">Широкая</option>
+                                    <option value="Узкая">Узкая</option>
+                                </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Долготная группа</label>
+                                    <select class="form-control" id="create_long_range">
+                                        <option value="">Выберите группу</option>
+                                        <option value="Длинная">Длинная</option>
+                                        <option value="Короткая">Короткая</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Экологическая группа</label>
+                                    <select class="form-control" id="create_ecologic_group">
+                                        <option value="">Выберите группу</option>
+                                        <option value="Лесная">Лесная</option>
+                                        <option value="Степная">Степная</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Трофическая группа</label>
+                                    <select class="form-control" id="create_trophic_group">
+                                        <option value="">Выберите группу</option>
+                                        <option value="Хищник">Хищник</option>
+                                        <option value="Травоядный">Травоядный</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2 mt-3">
+                            <h6 class="mb-0 text-muted">Изображения</h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary toggle-images" title="Показать/скрыть управление изображениями">
+                                📷
+                            </button>
+                        </div>
+                        <div class="row mb-3" id="images-section-create" style="display: none;">
+                            <div class="col-12">
+                                <input type="file" class="form-control" id="create_image" accept="image/*" style="display: none;">
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="$('#create_image').click()">📁</button>
+                                    <button type="button" class="btn btn-outline-info btn-sm" id="view-image-create">👁️</button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="delete-image-create">🗑️</button>
+                                </div>
+                                <div class="mt-2" id="image-preview-create"></div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-2 text-muted mt-3">Описание</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <textarea class="form-control" id="create_description" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-success btn-sm" id="createBeetleBtn">Создать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        class TableManager {
+          constructor(type) {
+            this.grid = null;
+            this.btnDetails = `<button class="btn btn-secondary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#detailsModal">Подробнее</button>`;
+            this.loadData();
+            this.getColumns(type);
+            this.columnIndexMap = {};
+            this.name = name;
+          }
+
+          init() {
+            this.initSelect2();
+            this.syncColumnsState();
+            this.renderTable();
+            this.fillFieldset();
+            this.bindEvents();
+            this.bindToggleAllSwitch();
+            this.bindHighlightColumns();
+          }
+
+          initSelect2() {
+            $('.multiple-select')
+              .select2({ placeholder: 'Выберите опции' })
+              .on('select2:unselect', function (e) {
+                let id = this.id;
+                const isRegions = id.endsWith('regions');
+                const modal = id.split('_')[0];
+                const $points = $(`#${modal}_points`);
+                const pointsValues = $points.val();
+                const region = isRegions
+                  ? e.params.data.id
+                  : $(e.params.data.element).attr('data-region');
+
+                let regionOptions = [];
+
+                $points.find(`option[data-region="${region}"]`).each((_, option) => {
+                  if (pointsValues.includes(option.value)) {
+                    isRegions
+                      ? pointsValues.splice(pointsValues.indexOf(option.value), 1)
+                      : regionOptions.push(option);
+                  }
+                });
+
+                if (isRegions) {
+                  $points.val(pointsValues).trigger('change');
+                } else if (!regionOptions.length) {
+                  const regions = $(`#${modal}_regions`).val();
+                  regions.splice(regions.indexOf(region), 1);
+                  $(`#${modal}_regions`).val(regions).trigger('change');
+                }
+              })
+              .on('select2:select', function (e) {
+                if (this.id.endsWith('points')) {
+                  const modal = this.id.split('_')[0];
+                  const $regions = $(`#${modal}_regions`);
+                  const region = $(e.params.data.element).attr('data-region');
+                  let selectedRegions = $regions.val();
+                  if (!selectedRegions.includes(region)) {
+                    selectedRegions.push(region);
+                    $regions.val(selectedRegions).trigger('change');
+                  }
+                }
+              });
+          }
+
+          syncColumnsState({ to = 'checkboxes' } = {}) {
+            this.columnIndexMap = {};
+            this.allColumns.forEach((col, index) => {
+              this.columnIndexMap[col.id] = index;
+            });
+
+            this.allColumns.forEach((col) => {
+              if (col.id === 'actions') return;
+              const checkbox = $(`.column-toggle[value="${col.id}"]`);
+              if (!checkbox.length) return;
+              if (to === 'checkboxes') {
+                checkbox.prop('checked', col.visible);
+              } else if (to === 'columns') {
+                col.visible = checkbox.prop('checked');
+              }
+            });
+          }
+
+          loadData() {
+            this.beetles = [];
+            $('#data_table tbody tr').each((_, tr) => {
+              const row = [];
+              $(tr)
+                .find('td')
+                .each((_, td) => row.push(td.innerText.trim()));
+              this.beetles.push(row);
+            });
+          }
+
+          getColumns(type) {
+            let columnsConfig = [];
+            let baseColumns = [
+              ['Подсемейство', 'family'],
+              ['Триба', 'tribe'],
+              ['Род', 'genus'],
+              ['Подрод', 'subgenus'],
+              ['Вид', 'species'],
+            ];
+            let geoColumns = [
+              ['Районы', 'region'],
+              ['Пункты', 'points'],
+            ];
+            let ecoColumns = [
+              ['Широтная группа', 'width_range'],
+              ['Долготная группа', 'long_range'],
+              ['Экологическая группа', 'ecologic_group'],
+              ['Трофическая группа', 'trophic_group'],
+              ['Ярусная группа', 'tiered_group'],
+            ];
+            let allColumns = [...baseColumns, ...geoColumns, ...ecoColumns];
+
+            for (let i = 0; i < allColumns.length; i++) {
+              let column = allColumns[i];
+              let isHidden =
+                (type == 'geo' && ecoColumns.includes(column)) ||
+                (type == 'eco' && geoColumns.includes(column));
+              columnsConfig.push({
+                name: column[0],
+                id: column[1],
+                visible: !isHidden,
+              });
+            }
+            columnsConfig.push({
+              name: 'Распространение',
+              id: 'description',
+              visible: false,
+            });
+            columnsConfig.push({
+              name: 'Действия',
+              sort: false,
+              visible: true,
+              formatter: (_, row) => {
+                const originalRowData = row.cells.map((c) => c.data);
+                const rowIndex = this.beetles.findIndex(
+                  (b) =>
+                    b[0] === originalRowData[0] &&
+                    b[1] === originalRowData[1] &&
+                    b[2] === originalRowData[2] &&
+                    b[3] === originalRowData[3] &&
+                    b[4] === originalRowData[4]
+                );
+                return gridjs.html(
+                  `<button class="btn btn-secondary btn-sm view-details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-row-index="${rowIndex}">Подробнее</button>`
+                );
+              },
+            });
+
+            this.allColumns = columnsConfig;
+          }
+
+          getFiltered() {
+            this.syncColumnsState({ to: 'columns' });
+            let data = this.beetles;
+
+            return {
+              columns: this.allColumns.map((col) => ({
+                name: col.name,
+                sort: col.sort,
+                hidden: !col.visible,
+                formatter: col.formatter,
+              })),
+              data,
+            };
+          }
+
+          renderTable() {
+            const currentSearch =
+              document.querySelector('.gridjs-search input')?.value || '';
+
+            const { columns, data } = this.getFiltered();
+
+            if (!this.grid) {
+              this.grid = new gridjs.Grid({
+                columns,
+                data,
+                resizable: true,
+                sort: true,
+                search: true,
+                pagination: { enabled: true, limit: 25 },
+                language: {
+                  search: { placeholder: 'Поиск по таблице...' },
+                  pagination: {
+                    previous: 'Назад',
+                    next: 'Вперед',
+                    showing: 'Показано с',
+                    to: 'по',
+                    of: 'из',
+                    results: 'результатов',
+                  },
+                  loading: 'Загрузка...',
+                  noRecordsFound: 'Записей не найдено',
+                },
+                className: {
+                  table: 'table table-bordered table-striped table-hover table-sm',
+                  thead: 'table-dark',
+                },
+                style: {
+                  td: { padding: '6px' },
+                  table: { fontSize: '14px' },
+                },
+              }).render(document.getElementById('table-wrapper'));
+            }
+
+            this.grid
+              .updateConfig({ columns: columns, search: { keyword: currentSearch } })
+              .forceRender();
+          }
+
+          bindEvents() {
+            $('.column-toggle').on('change', () => this.renderTable());
+          }
+
+          bindToggleAllSwitch() {
+            const toggleAll = $('#toggleAllColumns');
+            toggleAll.on('change', () => {
+              const isChecked = toggleAll.prop('checked');
+              $('.column-toggle').prop('checked', isChecked).trigger('change');
+            });
+          }
+
+          bindHighlightColumns() {
+            const columns = this.allColumns;
+            $('.form-switch').on('mouseenter', function () {
+              const $input = $(this).find('input');
+              const colId = $input.val();
+              if (!$input.prop('checked')) return;
+
+              const visibleCols = columns.filter((c) => c.visible).map((c) => c.id);
+              const visibleIndex = visibleCols.indexOf(colId);
+              if (visibleIndex === -1) return;
+
+              $('#table-wrapper table tr').each((_, row) => {
+                $(row)
+                  .find(`td:eq(${visibleIndex}), th:eq(${visibleIndex})`)
+                  .addClass('highlight-column');
+              });
+            });
+
+            $('.form-switch').on('mouseleave', function () {
+              $('#table-wrapper table td, #table-wrapper table th').removeClass(
+                'highlight-column'
+              );
+            });
+          }
+
+          fillFieldset() {
+            this.allColumns.forEach((child) => {
+              if (!['Вид', 'Действия'].includes(child.name) && child.visible) {
+                let id = child.id;
+                let name = child.name.replace(' группа', '');
+                $('#chooseColumns').append(
+                  `<div class="form-check form-switch">
+                        <input class="form-check-input column-toggle" type="checkbox" value="${id}"
+                            checked id="check_${id}">
+                        <label class="form-check-label" for="check_${id}">${name}</label>
+                    </div>`
+                );
+              }
+            });
+          }
+        }
+
+        const manager = new TableManager('eco');
+        $(document).ready(() => manager.init());
+
+        function populateModalSelects(modalId, currentBeetleData = []) {
+            let names = ['families', 'tribes', 'genus', 'subgenus', 'species', 'regions', 'points', 'width_range', 'long_range', 'ecologic_group', 'trophic_group', 'description']
+            for (let i = 0; i < names.length - 1; i++) {
+                let name = names[i];
+                let id = '#' + modalId + "_" + name
+                let value = currentBeetleData[i]
+                if (['families', 'tribes', 'genus', 'subgenus', 'regions', 'points'].includes(name)) {
+                    let options = [];
+                    value?.split(", ").map(element => {
+                        if (name == 'regions' && element != 'Улан-Удэ') element += ' район';
+                        options.push($(`option[name="${element}"]`).val());
+                    });
+                    value = options;
+                }
+                $(id).val(value).trigger('change');
+            }
+        }
+
+        const detailsModal = document.getElementById('detailsModal');
+        detailsModal.addEventListener('show.bs.modal', function (e) {
+            const button = e.relatedTarget;
+            const rowIndex = button.getAttribute('data-row-index');
+            const beetle = manager.beetles[rowIndex];
+            $('#edit_id').val(rowIndex);
+            populateModalSelects('edit', beetle);
+            $('#edit_species').val(beetle[4]);
+            $('#edit_description').text(beetle[12] || '');
+        });
+
+
+
+        function submitForm() {
+            const button = event.target;
+            console.log('Форма отправлена:', button.name);
+        }
+
+        $('#createBeetleBtn').on('click', function() {
+            console.log('Создание новой жужелицы');
+        });
+
+        // Переключение видимости секций географии
+        $('.toggle-geography').on('click', function() {
+            const modal = $(this).closest('.modal');
+            const geographySection = modal.find('[id^="geography-section"]');
+            const button = $(this);
+
+            geographySection.slideToggle(200, function() {
+                const isVisible = geographySection.is(':visible');
+                button.text(isVisible ? 'скрыть' : 'показать');
+                button.attr('title', isVisible ? 'Скрыть поля географии' : 'Показать поля географии');
+            });
+        });
+
+        // Переключение видимости секций изображений
+        $('.toggle-images').on('click', function() {
+            const modal = $(this).closest('.modal');
+            const imagesSection = modal.find('[id^="images-section"]');
+            const button = $(this);
+
+            imagesSection.slideToggle(200, function() {
+                const isVisible = imagesSection.is(':visible');
+                button.text(isVisible ? 'скрыть' : 'показать');
+                button.attr('title', isVisible ? 'Скрыть управление изображениями' : 'Показать управление изображениями');
+            });
+        });
+
+        // Обработка загрузки изображений
+        $('#edit_image, #create_image').on('change', function() {
+            const file = this.files[0];
+            const modal = $(this).closest('.modal');
+            const preview = modal.find('[id^="image-preview"]');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.html(`<img src="${e.target.result}" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">`);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+
+
+        // Удаление изображения
+        $(document).on('click', '[id^="delete-image"]', function() {
+            const modal = $(this).closest('.modal');
+            const preview = modal.find('[id^="image-preview"]');
+            const input = modal.find('input[type="file"]');
+            preview.html('<img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zNWVtIj7QndC10YIg0LjQt9C+0LHRgNCw0LbQtdC90LjRjzwvdGV4dD4KICA8L3N2Zz4K" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">');
+            input.val('');
+        });
+    </script>
+</body>
+
+</html>

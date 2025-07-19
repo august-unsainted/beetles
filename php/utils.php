@@ -81,8 +81,7 @@ function get_form($name): string
 {
     $selects = get_selects($name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
     $id = $name . '_name';
-    $inputs = "<input hidden id='$name" . "_id' name='id'>
-                <div class='col-md-6'>
+    $species_input = "<div class='col-md-6'>
                 <label for='$id' class='form-label fw-medium'>Вид</label>
                 <input type='text' class='form-control form-control-sm' id='$id' name='name'>
                 </div>";
@@ -94,10 +93,11 @@ function get_form($name): string
     return "<div class='modal-body'>
                 <form id='$name" . "_form' method='post' action='php/$action.php'>
                     <div class='row g-3'>
+                        <input hidden id='$name" . "_id' name='id'>
                         $selects
-                        $inputs
-                        $eco_selects
+                        $species_input
                         $multiple_selects
+                        $eco_selects
                         <div class='col-12'>
                             <label for='$desc_id' class='form-label fw-medium'>Распространение</label>
                             <textarea class='form-control form-control-sm' name='description' id='$desc_id'

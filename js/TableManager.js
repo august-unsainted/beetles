@@ -269,36 +269,20 @@ class TableManager {
       const button = e.relatedTarget;
       const rowIndex = $(button).attr('data-row-index');
       const beetle = manager.beetles[rowIndex];
-      let names = [
-        'id',
-        'families',
-        'tribes',
-        'genus',
-        'subgenus',
-        'name',
-        'regions',
-        'points',
-        'width_ranges',
-        'long_ranges',
-        'ecologic_groups',
-        'trophic_groups',
-        'tiered_groups',
-        'description',
-      ];
-      for (let i = 0; i < names.length; i++) {
-        let name = names[i];
-        let id = '#edit_' + name;
+      beetle.splice(1, 2);
+      let children = $('#edit_form').find('input, select, textarea').filter((i, el) => el.id);
+      $.each(children, function (i, child) {
         let value = beetle[i];
-        if (!['id', 'name', 'description'].includes(name) && value != '') {
+        if (!['id', 'name', 'description'].includes(child.name) && value != '') {
           let options = [];
           value.split(', ').map((element) => {
-            if (name == 'regions' && element != 'Улан-Удэ') element += ' район';
-            options.push($(`${id} option[name="${element}"]`).val());
+            if (child.name == 'regions' && element != 'Улан-Удэ') element += ' район';
+            options.push($(`#${child.id} option[name="${element}"]`).val());
           });
           value = options;
         }
-        $(id).val(value).trigger('change');
-      }
+        $(child).val(value).trigger('change');
+      });
     });
 
     $('#edit_genus, #new_genus').change(function (e) {
@@ -316,10 +300,13 @@ class TableManager {
     });
 
     $('#createBeetleModal').on('show.bs.modal', function (e) {
-      $.each($('#new_form').find('input, select, textarea'), function (_, element) {
-        $(element).val('')
-      })
-    })
+      $.each(
+        $('#new_form').find('input, select, textarea'),
+        function (_, element) {
+          $(element).val('');
+        }
+      );
+    });
   }
 }
 
