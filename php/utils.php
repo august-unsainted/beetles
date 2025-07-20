@@ -43,7 +43,7 @@ function get_select($id, $table, $multiple = false): string
     $query = $table == 'points' ? "SELECT DISTINCT id, SUBSTRING_INDEX(SUBSTRING_INDEX(name, ' [', 1), ', ', 1), region FROM points" : "SELECT * from $table";
     $result = mysqli_query($link, $query);
     $values = mysqli_fetch_all($result);
-    $classes = "form-select form-select-sm";
+    $classes = "form-select form-select-sm ";
     $name = $table;
     if ($multiple) {
         $classes .= " multiple-select";
@@ -53,7 +53,7 @@ function get_select($id, $table, $multiple = false): string
     $result = "<select class='$classes' name='$name' id='$id' " . ($multiple_str ?? '') . ">";
     foreach ($values as $value) {
         if ($table == 'points') {
-            $extra = "data-region='$value[2]'"; 
+            $extra = "data-region='$value[2]'";
         } elseif ($table == 'subgenus') {
             $extra = "data-genus='$value[2]'";
         } else {
@@ -72,7 +72,7 @@ function get_selects($modal, $selects, $multiple = false): string
         $id = $modal . '_' . $field;
         $select = get_select($id, $field, $multiple);
         $flex = $multiple ? "d-flex flex-column" : '';
-        $result .= "<div class='col-md-6 $flex'><label for='$id' class='form-label fw-medium'>$label</label>$select</div>";
+        $result .= "<div class='col-md-4 $flex'><label for='$id' class='form-label'>$label</label>$select</div>";
     }
     return $result;
 }
@@ -81,12 +81,13 @@ function get_form($name): string
 {
     $selects = get_selects($name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
     $id = $name . '_name';
-    $species_input = "<div class='col-md-6'>
-                <label for='$id' class='form-label fw-medium'>Вид</label>
-                <input type='text' class='form-control form-control-sm' id='$id' name='name'>
-                </div>";
-    $eco_selects = get_selects($name, ['width_ranges' => 'Широтная группа ареала', 'long_ranges' => 'Долготная группа ареала', 
-    'ecologic_groups' => 'Экологическая группа', 'trophic_groups' => 'Трофическая группа', 'tiered_groups' => 'Ярусная группа']);
+    $eco_selects = get_selects($name, [
+        'width_ranges' => 'Широтная группа ареала',
+        'long_ranges' => 'Долготная группа ареала',
+        'ecologic_groups' => 'Экологическая группа',
+        'trophic_groups' => 'Трофическая группа',
+        'tiered_groups' => 'Ярусная группа'
+    ]);
     $multiple_selects = get_selects($name, ['regions' => 'Районы сбора', 'points' => 'Точки сбора'], true);
     $desc_id = $name . "_description";
     $action = $name == 'edit' ? 'edit' : 'create';
@@ -94,8 +95,16 @@ function get_form($name): string
                 <form id='$name" . "_form' method='post' action='php/$action.php'>
                     <div class='row g-3'>
                         <input hidden id='$name" . "_id' name='id'>
-                        $selects
-                        $species_input
+                        <div class='modal-section'>
+                            <h6>Таксономия</h6>
+                            <div class='row mb-3'>
+                                $selects
+                                <div class='col-md-4'>
+                                    <label for='$id' class='form-label'>Вид</label>
+                                    <input type='text' class='form-control' id='$id' name='name'>
+                                </div>
+                            </div>
+                        </div>
                         $multiple_selects
                         $eco_selects
                         <div class='col-12'>

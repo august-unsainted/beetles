@@ -28,17 +28,13 @@ class TableManager {
         const modal = id.split('_')[0];
         const $points = $(`#${modal}_points`);
         const pointsValues = $points.val();
-        const region = isRegions
-          ? e.params.data.id
-          : $(e.params.data.element).attr('data-region');
+        const region = isRegions ? e.params.data.id : $(e.params.data.element).attr('data-region');
 
         let regionOptions = [];
 
         $points.find(`option[data-region="${region}"]`).each((_, option) => {
           if (pointsValues.includes(option.value)) {
-            isRegions
-              ? pointsValues.splice(pointsValues.indexOf(option.value), 1)
-              : regionOptions.push(option);
+            isRegions ? pointsValues.splice(pointsValues.indexOf(option.value), 1) : regionOptions.push(option);
           }
         });
 
@@ -118,10 +114,7 @@ class TableManager {
 
     for (let i = 0; i < allColumns.length; i++) {
       let column = allColumns[i];
-      let isHidden =
-        (type == 'geo' && ecoColumns.includes(column)) ||
-        (type == 'eco' && geoColumns.includes(column)) ||
-        column[0] == 'ID';
+      let isHidden = (type == 'geo' && ecoColumns.includes(column)) || (type == 'eco' && geoColumns.includes(column)) || column[0] == 'ID';
       columnsConfig.push({
         name: column[0],
         id: column[1],
@@ -139,12 +132,8 @@ class TableManager {
       visible: true,
       formatter: (_, row) => {
         const originalRowData = row.cells.map((c) => c.data);
-        const rowIndex = this.beetles.findIndex(
-          (b) => b[0] === originalRowData[0]
-        );
-        return gridjs.html(
-          `<button class="btn btn-secondary btn-sm view-details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-row-index="${rowIndex}">Подробнее</button>`
-        );
+        const rowIndex = this.beetles.findIndex((b) => b[0] === originalRowData[0]);
+        return gridjs.html(`<button class="btn btn-secondary btn-sm view-details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-row-index="${rowIndex}">Подробнее</button>`);
       },
     });
 
@@ -167,8 +156,7 @@ class TableManager {
   }
 
   renderTable() {
-    const currentSearch =
-      document.querySelector('.gridjs-search input')?.value || '';
+    const currentSearch = document.querySelector('.gridjs-search input')?.value || '';
 
     const { columns, data } = this.getFiltered();
     let table = document.getElementById('data_table');
@@ -204,9 +192,7 @@ class TableManager {
       }).render(document.getElementById('table-wrapper'));
     }
 
-    this.grid
-      .updateConfig({ columns: columns, search: { keyword: currentSearch } })
-      .forceRender();
+    this.grid.updateConfig({ columns: columns, search: { keyword: currentSearch } }).forceRender();
   }
 
   bindEvents() {
@@ -235,16 +221,12 @@ class TableManager {
       if (visibleIndex === -1) return;
 
       $('#table-wrapper table tr').each((_, row) => {
-        $(row)
-          .find(`td:eq(${visibleIndex}), th:eq(${visibleIndex})`)
-          .addClass('highlight-column');
+        $(row).find(`td:eq(${visibleIndex}), th:eq(${visibleIndex})`).addClass('highlight-column');
       });
     });
 
     $('.form-switch').on('mouseleave', function () {
-      $('#table-wrapper table td, #table-wrapper table th').removeClass(
-        'highlight-column'
-      );
+      $('#table-wrapper table td, #table-wrapper table th').removeClass('highlight-column');
     });
   }
 
@@ -268,9 +250,12 @@ class TableManager {
     $('#detailsModal').on('show.bs.modal', function (e) {
       const button = e.relatedTarget;
       const rowIndex = $(button).attr('data-row-index');
-      const beetle = manager.beetles[rowIndex];
+      const original = manager.beetles[rowIndex];
+      const beetle = original.slice();
       beetle.splice(1, 2);
-      let children = $('#edit_form').find('input, select, textarea').filter((i, el) => el.id);
+      let children = $('#edit_form')
+        .find('input, select, textarea')
+        .filter((i, el) => el.id);
       $.each(children, function (i, child) {
         let value = beetle[i];
         if (!['id', 'name', 'description'].includes(child.name) && value != '') {
@@ -300,12 +285,9 @@ class TableManager {
     });
 
     $('#createBeetleModal').on('show.bs.modal', function (e) {
-      $.each(
-        $('#new_form').find('input, select, textarea'),
-        function (_, element) {
-          $(element).val('');
-        }
-      );
+      $.each($('#new_form').find('input, select, textarea'), function (_, element) {
+        $(element).val('');
+      });
     });
   }
 }
