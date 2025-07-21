@@ -21,7 +21,10 @@ class TableManager {
 
   initSelect2() {
     ['details', 'createBeetle'].forEach(modalName => {
-      $(`#${modalName}Modal .form-select`).select2({ dropdownParent: `#${modalName}Modal` });
+      $.each($(`#${modalName}Modal .form-select`), function (_, element) {
+        $(element).select2({ dropdownParent: $(element).parent() });
+      })
+      
     });
 
     $('.multiple-select')
@@ -276,7 +279,7 @@ class TableManager {
 
     $('#edit_genus, #new_genus').on('select2:select', function (e) {
       const modal = this.id.split('_')[0];
-      $(`#${modal}_subgenus`).val('');
+      $(`#${modal}_subgenus`).val('').trigger('change');
     });
 
     $('#edit_subgenus, #new_subgenus').on('select2:select', function (e) {
@@ -284,13 +287,13 @@ class TableManager {
       const selectedOption = $(this).find(`option[value="${this.value}"]`)[0];
       if (selectedOption) {
         const genus = selectedOption.getAttribute('data-genus');
-        if (genus) $(`#${modal}_genus`).val(genus);
+        if (genus) $(`#${modal}_genus`).val(genus).trigger('change');
       }
     });
 
     $('#createBeetleModal').on('show.bs.modal', function (e) {
       $.each($('#new_form').find('input, select, textarea'), function (_, element) {
-        $(element).val('');
+        $(element).val('').trigger('change');
       });
     });
   }

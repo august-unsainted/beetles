@@ -106,15 +106,15 @@ function get_form($name): string
     $range_selects = str_replace('col-md-4', 'col-md-6', $range_selects);
     return "<div class='modal-body'>
                 <form id='$name" . "_form' method='post' action='php/$action.php'>
-                    <div class='row g-3'>
+                    <div class='row g-2'>
                         <input hidden id='$name" . "_id' name='id'>
                         $selects
                         $multiple_selects
                         $range_selects
                         $eco_selects
                         <div class='modal-section'>
+                            <label for='$desc_id' class='form-label fw-medium'><h6 style='color: black;'>Распространение</h6></label>
                             <div class='col-12'>
-                                <label for='$desc_id' class='form-label fw-medium'>Распространение</label>
                                 <textarea class='form-control form-control-sm' name='description' id='$desc_id'
                                     rows='3'></textarea>
                             </div>

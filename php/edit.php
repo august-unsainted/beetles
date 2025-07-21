@@ -36,7 +36,6 @@ function speciesPointsActions()
 if (isset($_POST)) {
     if ($_POST['action'] == 'apply') {
         $params = [];
-        $points_params = [];
         foreach ($_POST as $key => $value) {
             if (!in_array($key, ['id', 'regions', 'points', 'action'])) {
                 if (str_ends_with($key, 's') && !in_array($key, ['genus', 'subgenus'])) {
