@@ -65,52 +65,59 @@ function get_select($id, $table, $multiple = false): string
     return $result;
 }
 
-function get_selects($modal, $selects, $multiple = false): string
+function get_selects($row_name, $modal, $selects, $multiple = false): string
 {
-    $result = '';
+    $result = "<div class='modal-section'>
+                        <h6 style='color: black;'>$row_name</h6>
+                            <div class='row mb-3'>";
     foreach ($selects as $field => $label) {
         $id = $modal . '_' . $field;
         $select = get_select($id, $field, $multiple);
         $flex = $multiple ? "d-flex flex-column" : '';
-        $result .= "<div class='col-md-4 $flex'><label for='$id' class='form-label'>$label</label>$select</div>";
+        $result .= "<div class='col-md-" . ($multiple ? 6 : 4) . " $flex'>
+                        <label for='$id' class='form-label'>$label</label>
+                        $select
+                    </div>";
     }
-    return $result;
+    return $result . "</div></div>";
 }
 
 function get_form($name): string
 {
-    $selects = get_selects($name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
+    $selects = get_selects('Таксономия', $name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
     $id = $name . '_name';
-    $eco_selects = get_selects($name, [
-        'width_ranges' => 'Широтная группа ареала',
-        'long_ranges' => 'Долготная группа ареала',
+    $selects = str_replace('</div></div></div>', "</div><div class='col-md-4'>
+        <label for='$id' class='form-label'>Вид</label>
+        <input type='text' class='form-control' id='$id' name='name'>
+        </div></div></div>", $selects);
+    
+    $range_selects = get_selects('Ареал', $name, [
+        'width_ranges' => 'Широтная группа',
+        'long_ranges' => 'Долготная группа',
+    ]);
+    $eco_selects = get_selects('Экология', $name, [
         'ecologic_groups' => 'Экологическая группа',
         'trophic_groups' => 'Трофическая группа',
         'tiered_groups' => 'Ярусная группа'
     ]);
-    $multiple_selects = get_selects($name, ['regions' => 'Районы сбора', 'points' => 'Точки сбора'], true);
+    $multiple_selects = get_selects('География', $name, ['regions' => 'Районы сбора', 'points' => 'Точки сбора'], true);
     $desc_id = $name . "_description";
     $action = $name == 'edit' ? 'edit' : 'create';
+    $range_selects = str_replace('col-md-4', 'col-md-6', $range_selects);
     return "<div class='modal-body'>
                 <form id='$name" . "_form' method='post' action='php/$action.php'>
                     <div class='row g-3'>
                         <input hidden id='$name" . "_id' name='id'>
-                        <div class='modal-section'>
-                            <h6>Таксономия</h6>
-                            <div class='row mb-3'>
-                                $selects
-                                <div class='col-md-4'>
-                                    <label for='$id' class='form-label'>Вид</label>
-                                    <input type='text' class='form-control' id='$id' name='name'>
-                                </div>
-                            </div>
-                        </div>
+                        $selects
                         $multiple_selects
+                        $range_selects
                         $eco_selects
-                        <div class='col-12'>
-                            <label for='$desc_id' class='form-label fw-medium'>Распространение</label>
-                            <textarea class='form-control form-control-sm' name='description' id='$desc_id'
-                                rows='3'></textarea>
+                        <div class='modal-section'>
+                            <div class='col-12'>
+                                <label for='$desc_id' class='form-label fw-medium'>Распространение</label>
+                                <textarea class='form-control form-control-sm' name='description' id='$desc_id'
+                                    rows='3'></textarea>
+                            </div>
                         </div>
                     </div>
                     <input hidden name='action'>

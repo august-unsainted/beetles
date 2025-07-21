@@ -20,6 +20,10 @@ class TableManager {
   }
 
   initSelect2() {
+    ['details', 'createBeetle'].forEach(modalName => {
+      $(`#${modalName}Modal .form-select`).select2({ dropdownParent: `#${modalName}Modal` });
+    });
+
     $('.multiple-select')
       .select2({ placeholder: 'Выберите опции' })
       .on('select2:unselect', function (e) {
@@ -261,7 +265,7 @@ class TableManager {
         if (!['id', 'name', 'description'].includes(child.name) && value != '') {
           let options = [];
           value.split(', ').map((element) => {
-            if (child.name == 'regions' && element != 'Улан-Удэ') element += ' район';
+            if (child.name == 'regions[]' && element != 'Улан-Удэ') element += ' район';
             options.push($(`#${child.id} option[name="${element}"]`).val());
           });
           value = options;
@@ -270,12 +274,12 @@ class TableManager {
       });
     });
 
-    $('#edit_genus, #new_genus').change(function (e) {
+    $('#edit_genus, #new_genus').on('select2:select', function (e) {
       const modal = this.id.split('_')[0];
       $(`#${modal}_subgenus`).val('');
     });
 
-    $('#edit_subgenus, #new_subgenus').change(function (e) {
+    $('#edit_subgenus, #new_subgenus').on('select2:select', function (e) {
       const modal = this.id.split('_')[0];
       const selectedOption = $(this).find(`option[value="${this.value}"]`)[0];
       if (selectedOption) {
