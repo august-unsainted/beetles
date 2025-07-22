@@ -88,9 +88,11 @@ function get_form($name): string
     $id = $name . '_name';
     $selects = str_replace('</div></div></div>', "</div><div class='col-md-4'>
         <label for='$id' class='form-label'>Вид</label>
-        <input type='text' class='form-control' id='$id' name='name'>
+        <input type='text' class='form-control' id='$id' name='name' reqired>
         </div></div></div>", $selects);
-    
+    $genus_name = $name . "_genus";
+    $selects = str_replace("id='$genus_name'", "id='$genus_name' required", $selects);
+
     $range_selects = get_selects('Ареал', $name, [
         'width_ranges' => 'Широтная группа',
         'long_ranges' => 'Долготная группа',
@@ -104,6 +106,11 @@ function get_form($name): string
     $desc_id = $name . "_description";
     $action = $name == 'edit' ? 'edit' : 'create';
     $range_selects = str_replace('col-md-4', 'col-md-6', $range_selects);
+    $footer = $name == 'edit' ? "
+              <button name='action' value='delete' class='btn btn-danger btn-sm me-auto'>Удалить</button>
+              <button type='button' class='btn btn-secondary btn-sm' data-bs-dismiss='modal'>Закрыть</button>
+              <button name='action' value='apply' class='btn btn-primary btn-sm'>Сохранить</button>" : "<button type='button' class='btn btn-secondary btn-sm' data-bs-dismiss='modal'>Отмена</button>
+                    <button class='btn btn-success btn-sm' id='createBeetleBtn'>Создать</button>";
     return "<div class='modal-body'>
                 <form id='$name" . "_form' method='post' action='php/$action.php'>
                     <div class='row g-2'>
@@ -121,6 +128,7 @@ function get_form($name): string
                         </div>
                     </div>
                     <input hidden name='action'>
+                    <div class='modal-footer'>$footer</div>
                 </form>
             </div>";
 }

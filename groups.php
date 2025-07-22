@@ -74,13 +74,6 @@ require_once('php/utils.php');
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <?= get_form("edit") ?>
-                <div class="modal-footer">
-                    <button type="button" name="delete" onclick="submitForm()"
-                        class="btn btn-danger btn-sm">Удалить</button>
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="button" name="apply" onclick="submitForm()" class="btn btn-primary btn-sm">Сохранить
-                        изменения</button>
-                </div>
             </div>
         </div>
     </div>
@@ -95,10 +88,7 @@ require_once('php/utils.php');
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <?= get_form("new") ?>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-success btn-sm" id="createBeetleBtn">Создать</button>
-                </div>
+                
             </div>
         </div>
     </div>

@@ -302,6 +302,8 @@ class TableManager {
 function submitForm() {
   const button = event.target;
   const form = $(button).parent().parent().find('form')[0];
-  $(form.action).val(button.name);
+  if (button.name) {
+     $(form.action).val(button.name);
+  }
   $(form).trigger('submit');
 }

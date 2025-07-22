@@ -50,7 +50,8 @@ if (isset($_POST)) {
         echo "UPDATE species SET " . join(", ", $params) . " WHERE id = $_POST[id]";
 
     } else {
-        $result = mysqli_query($link, "DELETE FROM species WHERE id = $_POST[id]");
+        mysqli_query($link, "DELETE FROM species WHERE id = $_POST[id]");
+        mysqli_query($link, "DELETE FROM species_points WHERE beetle = $_POST[id]");
     }
 }
 header('Location: /groups.php');
