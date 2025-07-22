@@ -35,12 +35,12 @@ require_once('php/utils.php');
                 Создать новую жужелицу
             </button>
         </div>
-        <div>
+        <div id="filters">
             <form action="" method="get" style="display: flex; gap: 8px">
                 <?= get_select('regions_select', 'regions', true) ?>
+                <button type="button" onclick="resetFilters()" class="btn btn-secondary btn-sm">Сбросить</button>
                 <button class="btn btn-secondary btn-sm">Применить</button>
             </form>
-
         </div>
         <?= get_table(isset($_GET['regions']) ? 'WHERE p.region IN (' . join(', ', $_GET['regions']) . ')' : '') ?>
 
@@ -91,7 +91,15 @@ require_once('php/utils.php');
             let params = new URLSearchParams(window.location.search);
             const region = params.getAll('regions[]');
             if (region) $('#regions_select').val(region).trigger('change');
+            console.log(document.getElementById('filters') )
+            $('.gridjs-head')[0].append(document.getElementById('filters'))
+            
         });
+
+        function resetFilters() {
+            $('#regions_select').val("").trigger('change');
+            window.location.replace(window.location.pathname);
+        }
     </script>
 </body>
 

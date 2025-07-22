@@ -78,6 +78,11 @@
   padding: 6px !important;
 }
 
+.gridjs-head {
+  display: flex;
+  gap: 12px;
+}
+
 .highlight-column {
   background-color: rgba(255, 235, 59, 0.3) !important;
   transition: background-color 0.2s;
@@ -145,4 +150,9 @@
   margin-bottom: 0.5rem;
   margin-top: 0;
   font-size: 1.1rem;
+}
+
+.gridjs-head .btn-secondary {
+    background-color: var(--bs-btn-bg) !important;
+    padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
 }
