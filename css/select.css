@@ -156,3 +156,7 @@
     background-color: var(--bs-btn-bg) !important;
     padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
 }
+
+#filters span {
+  height: 100%;
+}

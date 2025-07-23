@@ -4,7 +4,7 @@ require_once('connect_db.php');
 function get_table($where = ''): string
 {
     global $link;
-    $query = "SELECT s.id as 'ID', f.name as 'Подсемейство', t.name as 'Триба', g.name as 'Род', sg.name as 'Подрод', s.name as 'Вид',
+    $query = "SELECT s.id as 'ID', f.name as 'Подсемейство', t.name as 'Триба', g.name as 'Род', sg.name as 'Подрод', s.name as 'Вид', s.synonyms as 'Синонимы',
     GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(r.name, ' район', 1) SEPARATOR ', ') as 'Районы', GROUP_CONCAT(DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(p.name, ' [', 1), ', ', 1) SEPARATOR ', ') as 'Пункты_сбора',
     w.name as 'Широтная_группа', l.name as 'Долготная_группа', e.name as 'Экологическая_группа', tr.name as 'Трофическая_группа', ti.name as 'Ярусная_группа', s.description as 'Распространение'
     FROM species s
@@ -86,10 +86,16 @@ function get_form($name): string
 {
     $selects = get_selects('Таксономия', $name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
     $id = $name . '_name';
+    $synonyms_id = $name . '_synonyms';
     $selects = str_replace('</div></div></div>', "</div><div class='col-md-4'>
         <label for='$id' class='form-label'>Вид</label>
         <input type='text' class='form-control' id='$id' name='name' reqired>
-        </div></div></div>", $selects);
+        </div>
+        <div class='col-md-12'>
+        <label for='$synonyms_id' class='form-label'>Синонимы</label>
+        <input type='text' class='form-control' id='$synonyms_id' name='synonyms'>
+        </div>
+        </div></div>", $selects);
     $genus_name = $name . "_genus";
     $selects = str_replace("id='$genus_name'", "id='$genus_name' required", $selects);
 

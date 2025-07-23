@@ -105,6 +105,7 @@ class TableManager {
       ['Род', 'genus'],
       ['Подрод', 'subgenus'],
       ['Вид', 'name'],
+      ['Синонимы', 'synonyms'],
     ];
     let geoColumns = [
       ['Районы', 'region'],
@@ -265,7 +266,7 @@ class TableManager {
         .filter((i, el) => el.id);
       $.each(children, function (i, child) {
         let value = beetle[i];
-        if (!['id', 'name', 'description'].includes(child.name) && value != '') {
+        if (!['id', 'name', 'description', 'synonyms'].includes(child.name) && value != '') {
           let options = [];
           value.split(', ').map((element) => {
             if (child.name == 'regions[]' && element != 'Улан-Удэ') element += ' район';

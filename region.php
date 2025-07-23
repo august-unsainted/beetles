@@ -36,7 +36,7 @@ require_once('php/utils.php');
             </button>
         </div>
         <div id="filters">
-            <form action="" method="get" style="display: flex; gap: 8px">
+            <form action="" method="get" style="display: flex; gap: 8px; height: 100%;">
                 <?= get_select('regions_select', 'regions', true) ?>
                 <button type="button" onclick="resetFilters()" class="btn btn-secondary btn-sm">Сбросить</button>
                 <button class="btn btn-secondary btn-sm">Применить</button>
