@@ -93,7 +93,7 @@ function get_form($name): string
         </div>
         <div class='col-md-12'>
         <label for='$synonyms_id' class='form-label'>Синонимы</label>
-        <input type='text' class='form-control' id='$synonyms_id' name='synonyms'>
+        <textarea class='form-control' id='$synonyms_id' name='synonyms'></textarea>
         </div>
         </div></div>", $selects);
     $genus_name = $name . "_genus";
@@ -137,5 +137,34 @@ function get_form($name): string
                     <div class='modal-footer'>$footer</div>
                 </form>
             </div>";
+}
+
+function get_columns_fieldset()
+{
+    echo "<fieldset class='w-100 w-md-50' id='chooseColumns'>
+        <legend class='fs-6 text-muted mb-2'>Признаки</legend>
+        <ul class='nav nav-tabs' id='columnTabs' role='tablist'>";
+    $tabs = ['Основные' => 'main', 'Экологические' => 'eco', 'Географические' => 'geo', 'Дополнительные' => 'extra'];
+    foreach ($tabs as $name => $data) {
+        echo "<li class='nav-item' role='presentation'>
+            <button class='nav-link' id='$data-tab' data-bs-toggle='tab' data-bs-target='#$data'
+            type='button' role='tab' aria-controls='$data'>$name</button>
+        </li>";
+    }
+    echo "</ul><div class='tab-content mt-2' id='columnTabsContent'>";
+    foreach ($tabs as $name => $data) {
+        $name = mb_strtolower($name);
+        $btn = $data == "geo" ? "<button type='button' class='btn btn-outline-primary btn-sm btn-create-geo' data-bs-toggle='modal' data-bs-target='#createGeoModal'>+ Создать пункт</button>" : "";
+        echo "<div class='tab-pane fade' id='$data' role='tabpanel' aria-labelledby='$data-tab'>
+                <div class='tab-pane-content'>
+                    <div class='form-check form-switch'>
+                        <input class='form-check-input toggle-all-local' type='checkbox' id='toggleAll$data' checked>
+                        <label class='form-check-label' for='toggleAll$data'><strong>Все $name признаки</strong></label>
+                    </div>
+                </div>
+                $btn
+            </div>";
+    }
+    echo "</div></fieldset>";
 }
 ?>

@@ -12,11 +12,11 @@ class TableManager {
     this.initSelect2();
     this.syncColumnsState();
     this.renderTable();
-    this.fillFieldset();
-    this.bindEvents();
-    this.bindToggleAllSwitch();
+    // this.fillFieldset();
+    this.renderColumnControls();
     this.bindHighlightColumns();
     this.bindModalEvents();
+    this.bindSwitchEvents();
   }
 
   initSelect2() {
@@ -24,7 +24,7 @@ class TableManager {
       $.each($(`#${modalName}Modal .form-select`), function (_, element) {
         $(element).select2({ dropdownParent: $(element).parent() });
       })
-      
+
     });
 
     $('.multiple-select')
@@ -100,33 +100,34 @@ class TableManager {
     let columnsConfig = [];
     let baseColumns = [
       ['ID', 'id'],
-      ['Подсемейство', 'family'],
-      ['Триба', 'tribe'],
-      ['Род', 'genus'],
-      ['Подрод', 'subgenus'],
+      ['Подсемейство', 'family', 'main'],
+      ['Триба', 'tribe', 'main'],
+      ['Род', 'genus', 'main'],
+      ['Подрод', 'subgenus', 'main'],
       ['Вид', 'name'],
-      ['Синонимы', 'synonyms'],
+      ['Синонимы', 'synonyms', 'extra'],
     ];
     let geoColumns = [
-      ['Районы', 'region'],
-      ['Пункты', 'points'],
+      ['Районы', 'region', 'geo'],
+      ['Пункты', 'points', 'geo'],
     ];
     let ecoColumns = [
-      ['Широтная группа', 'width_range'],
-      ['Долготная группа', 'long_range'],
-      ['Экологическая группа', 'ecologic_group'],
-      ['Трофическая группа', 'trophic_group'],
-      ['Ярусная группа', 'tiered_group'],
+      ['Широтная группа', 'width_range', 'eco'],
+      ['Долготная группа', 'long_range', 'eco'],
+      ['Экологическая группа', 'ecologic_group', 'eco'],
+      ['Трофическая группа', 'trophic_group', 'eco'],
+      ['Ярусная группа', 'tiered_group', 'eco'],
     ];
-    let allColumns = [...baseColumns, ...geoColumns, ...ecoColumns];
+    let allColumns = [...baseColumns, ...geoColumns, ...ecoColumns, ['Распространение', 'description', 'extra']];
 
     for (let i = 0; i < allColumns.length; i++) {
       let column = allColumns[i];
-      let isHidden = (type == 'geo' && ecoColumns.includes(column)) || (type == 'eco' && geoColumns.includes(column)) || column[0] == 'ID';
+      let isHidden = (type == 'geo' && ecoColumns.includes(column)) || (type == 'eco' && geoColumns.includes(column)) || ['ID', 'Синонимы', 'Распространение'].includes(column[0]);
       columnsConfig.push({
         name: column[0],
         id: column[1],
         visible: !isHidden,
+        group: column[2] || ''
       });
     }
     columnsConfig.push({
@@ -203,16 +204,13 @@ class TableManager {
     this.grid.updateConfig({ columns: columns, search: { keyword: currentSearch } }).forceRender();
   }
 
-  bindEvents() {
-    $('.column-toggle').on('change', () => this.renderTable());
-  }
-
-  bindToggleAllSwitch() {
+  bindSwitchEvents() {
     const toggleAll = $('#toggleAllColumns');
     toggleAll.on('change', () => {
       const isChecked = toggleAll.prop('checked');
       $('.column-toggle').prop('checked', isChecked).trigger('change');
     });
+    $('.column-toggle').on('change', () => this.renderTable());
   }
 
   bindHighlightColumns() {
@@ -220,12 +218,12 @@ class TableManager {
     $('.form-switch').on('mouseenter', function () {
       const $input = $(this).find('input');
       const colId = $input.val();
-      // console.log(colId)
       if (!$input.prop('checked')) return; // Если свич выкл — не подсвечиваем
 
       // Получаем массив id видимых колонок
       const visibleCols = columns.filter((c) => c.visible).map((c) => c.id);
       const visibleIndex = visibleCols.indexOf(colId);
+
       if (visibleIndex === -1) return;
 
       $('#table-wrapper table tr').each((_, row) => {
@@ -235,22 +233,6 @@ class TableManager {
 
     $('.form-switch').on('mouseleave', function () {
       $('#table-wrapper table td, #table-wrapper table th').removeClass('highlight-column');
-    });
-  }
-
-  fillFieldset() {
-    this.allColumns.forEach((child) => {
-      if (!['Вид', 'Действия'].includes(child.name) && child.visible) {
-        let id = child.id;
-        let name = child.name.replace(' группа', '');
-        $('#chooseColumns').append(
-          `<div class="form-check form-switch">
-                <input class="form-check-input column-toggle" type="checkbox" value="${id}"
-                    checked id="check_${id}">
-                <label class="form-check-label" for="check_${id}">${name}</label>
-            </div>`
-        );
-      }
     });
   }
 
@@ -298,13 +280,61 @@ class TableManager {
       });
     });
   }
+
+  renderColumnControls() {
+    $('.nav-link').attr('aria-selected', false)
+    $('#main-tab').attr('aria-selected', true).addClass('active')
+    $('#main').addClass('show active')
+    this.groups = ['main', 'eco', 'geo', 'extra']
+    this.groups.forEach(group => {
+      const container = $(`#${group} .tab-pane-content`);
+      const cols = this.allColumns.filter(c => c.group === group && c.name !== 'Вид');
+      const toggleId = `toggleAll${group}`;
+
+      container.find('.column-toggle').closest('.form-check').remove();
+
+      cols.forEach(col => {
+        const label = col.name.replace(' группа', '');
+        container.append(`
+            <div class="form-check form-switch">
+              <input class="form-check-input column-toggle" type="checkbox" value="${col.id}" ${col.visible ? 'checked' : ''} id="check_${col.id}">
+              <label class="form-check-label" for="check_${col.id}">${label}</label>
+            </div>
+          `);
+      });
+
+      const $toggle = $(`#${toggleId}`);
+      $toggle.off('change').on('change', () => {
+        const checked = $toggle.prop('checked');
+        container.find('.column-toggle').prop('checked', checked);
+        this.syncGlobalToggle();
+        this.renderTable();
+      });
+    });
+
+    $('#toggleAllGlobal').off('change').on('change', () => {
+      const checked = $('#toggleAllGlobal').prop('checked');
+      $('.column-toggle').prop('checked', checked);
+      $('.toggle-all-local').prop('checked', checked);
+      this.renderTable();
+    });
+
+    this.syncGlobalToggle();
+  }
+
+  syncGlobalToggle() {
+    const allChecked = this.groups.every(group =>
+      $(`#toggleAll${group}`).prop('checked')
+    );
+    $('#toggleAllGlobal').prop('checked', allChecked);
+  }
 }
 
 function submitForm() {
   const button = event.target;
   const form = $(button).parent().parent().find('form')[0];
   if (button.name) {
-     $(form.action).val(button.name);
+    $(form.action).val(button.name);
   }
   $(form).trigger('submit');
 }

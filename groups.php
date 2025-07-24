@@ -40,19 +40,7 @@ require_once('php/utils.php');
                                 + Создать жужелицу
                             </button>
                         </div>
-
-                        <!-- Настройки отображения -->
-                        <fieldset class="w-100 w-md-50" style="min-width: 260px;">
-                            <legend class="fs-6 text-muted mb-2">Признаки</legend>
-                            <div class="d-flex flex-wrap gap-2" id="chooseColumns">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="toggleAllColumns" checked>
-                                    <label class="form-check-label" for="toggleAllColumns">
-                                        <strong>Все признаки</strong>
-                                    </label>
-                                </div>
-                            </div>
-                        </fieldset>
+                        <?= get_columns_fieldset() ?>
                     </div>
                 </section>
 
@@ -60,6 +48,38 @@ require_once('php/utils.php');
 
                 <!-- Основная таблица -->
                 <div id="table-wrapper" class="rounded"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно: Создать район/пункт -->
+    <div class="modal fade" id="createGeoModal" tabindex="-1" aria-labelledby="createGeoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createGeoModalLabel">Создать новый элемент</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Форма охватывает body и footer -->
+                <form id="createGeoForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="geoName" class="form-label">Название</label>
+                            <input type="text" class="form-control" id="geoName" name="geoName" required>
+                        </div>
+
+                        <div class="mb-3" id="regionSelectGroup">
+                            <label for="regionSelect" class="form-label">Район</label>
+                            <?= get_select('regionsGeo', 'regions') ?>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- Кнопка "Отмена" — просто закрывает модалку -->
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                        <!-- Кнопка "Сохранить" — отправляет форму -->
+                        <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -88,7 +108,7 @@ require_once('php/utils.php');
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <?= get_form("new") ?>
-                
+
             </div>
         </div>
     </div>
