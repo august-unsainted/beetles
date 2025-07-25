@@ -15,7 +15,7 @@ require_once('php/utils.php');
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/jquery-3.7.1.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
@@ -26,6 +26,7 @@ require_once('php/utils.php');
     <!-- Основной контейнер страницы с отступами -->
     <div class="container-fluid py-4 px-3">
         <!-- Карточка с контентом -->
+
         <div class="card border-0">
             <div class="card-body">
                 <section class="mb-4">
@@ -40,16 +41,25 @@ require_once('php/utils.php');
                                 + Создать жужелицу
                             </button>
                         </div>
+
                         <?= get_columns_fieldset() ?>
                     </div>
                 </section>
-
-                <?= get_table() ?>
+                <div id="filters_hidden" style="display: none">
+                    <form action="" method="get" style="display: flex; gap: 8px; height: 100%;">
+                        <?= str_replace('multiple-select', '', get_select('regions_select', 'regions', true)) ?>
+                        <button type="button" onclick="resetFilters()"
+                            class="btn btn-secondary btn-sm">Сбросить</button>
+                        <button class="btn btn-secondary btn-sm">Применить</button>
+                    </form>
+                </div>
+                <?= get_table(isset($_GET['regions']) ? 'WHERE p.region IN (' . join(', ', $_GET['regions']) . ')' : '') ?>
 
                 <!-- Основная таблица -->
                 <div id="table-wrapper" class="rounded"></div>
             </div>
         </div>
+
     </div>
 
     <!-- Модальное окно: Создать район/пункт -->
@@ -120,7 +130,20 @@ require_once('php/utils.php');
     <script src="/js/TableManager.js"></script>
     <script>
         const manager = new TableManager('eco');
-        $(document).ready(() => manager.init());
+        $(document).ready(() => {
+            manager.init()
+            let params = new URLSearchParams(window.location.search);
+            const region = params.getAll('regions[]');
+            if (region) {
+                $('#filters select').val(region).trigger('change');
+                $('#filters_hidden').val(region)
+            };
+        });
+
+        function resetFilters() {
+            $('#regions_select').val("").trigger('change');
+            window.location.replace(window.location.pathname);
+        }
     </script>
 
 </body>
