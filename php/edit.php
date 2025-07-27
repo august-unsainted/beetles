@@ -54,6 +54,6 @@ if (isset($_POST)) {
         mysqli_query($link, "DELETE FROM species_points WHERE beetle = $_POST[id]");
     }
 }
-header('Location: /groups.php');
+header('Location: /index.php');
 
 ?>

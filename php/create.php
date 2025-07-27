@@ -31,6 +31,6 @@ if (isset($_POST)) {
         echo "INSERT INTO species_points VALUES " . join(', ', $points) . '<br>';
     }
 }
-header('Location: /groups.php');
+header('Location: /index.php');
 
 ?>

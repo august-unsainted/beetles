@@ -50,7 +50,6 @@ require_once('php/utils.php');
                         <?= str_replace('multiple-select', '', get_select('regions_select', 'regions', true)) ?>
                         <button type="button" onclick="resetFilters()"
                             class="btn btn-secondary btn-sm">Сбросить</button>
-                        <button class="btn btn-secondary btn-sm">Применить</button>
                     </form>
                 </div>
                 <?= get_table(isset($_GET['regions']) ? 'WHERE p.region IN (' . join(', ', $_GET['regions']) . ')' : '') ?>

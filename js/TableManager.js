@@ -12,7 +12,7 @@ class TableManager {
     const originalRowData = row.cells.map((c) => c.data);
     const rowIndex = this.beetles.findIndex((b) => b[0] === originalRowData[0]);
     return gridjs.html(`<button class="btn btn-secondary btn-sm view-details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-row-index="${rowIndex}">Подробнее</button>`);
-  }
+  };
 
   init() {
     this.initSelect2();
@@ -25,11 +25,10 @@ class TableManager {
   }
 
   initSelect2() {
-    ['details', 'createBeetle'].forEach(modalName => {
+    ['details', 'createBeetle'].forEach((modalName) => {
       $.each($(`#${modalName}Modal .form-select`), function (_, element) {
         $(element).select2({ dropdownParent: $(element).parent() });
-      })
-
+      });
     });
 
     $('.multiple-select')
@@ -41,7 +40,6 @@ class TableManager {
         const $points = $(`#${modal}_points`);
         const pointsValues = $points.val();
         const region = isRegions ? e.params.data.id : $(e.params.data.element).attr('data-region');
-
         let regionOptions = [];
 
         $points.find(`option[data-region="${region}"]`).each((_, option) => {
@@ -103,14 +101,13 @@ class TableManager {
 
   getColumns(type) {
     if (localStorage.getItem('columns')) {
-      localStorage.clear()
-      // const storedColumns = JSON.parse(localStorage.getItem('columns'));
-      // if (storedColumns) {
-      //   console.log(storedColumns)
-      //   storedColumns[15].formatter = this.detailsFormatter;
-      //   this.allColumns = storedColumns;
-      //   return;
-      // }
+      // localStorage.clear()
+      const storedColumns = JSON.parse(localStorage.getItem('columns'));
+      if (storedColumns) {
+        storedColumns[15].formatter = this.detailsFormatter;
+        this.allColumns = storedColumns;
+        return;
+      }
     }
     let columnsConfig = [];
     let baseColumns = [
@@ -138,8 +135,10 @@ class TableManager {
     for (let i = 0; i < allColumns.length; i++) {
       let column = allColumns[i];
       columnsConfig.push({
-        name: column[0], id: column[1], group: column[2] || '',
-        hidden: (type == 'geo' && ecoColumns.includes(column)) || (type == 'eco' && geoColumns.includes(column)) || ['ID', 'Синонимы', 'Распространение'].includes(column[0])
+        name: column[0],
+        id: column[1],
+        group: column[2] || '',
+        hidden: (type == 'geo' && ecoColumns.includes(column)) || (type == 'eco' && geoColumns.includes(column)) || ['ID', 'Синонимы', 'Распространение'].includes(column[0]),
       });
     }
     columnsConfig.push({ name: 'Действия', sort: false, hidden: false, formatter: this.detailsFormatter });
@@ -151,7 +150,7 @@ class TableManager {
     const currentSearch = document.querySelector('.gridjs-search input')?.value || '';
     this.syncColumnsState({ to: 'columns' });
     const data = this.beetles;
-    const columns = this.allColumns
+    const columns = this.allColumns;
     if (!this.grid) {
       this.grid = new gridjs.Grid({
         columns,
@@ -185,10 +184,11 @@ class TableManager {
     }
 
     this.grid.updateConfig({ columns: columns, search: { keyword: currentSearch } }).forceRender();
-    localStorage.setItem('columns', JSON.stringify(columns))
-    let $hidden = $("#filters_hidden");
-    $hidden.clone().attr('style', '').attr('id', 'filters').appendTo(".gridjs-head");
-    $('#filters select').select2({ placeholder: 'Выберите опции' }).val($hidden.val()).trigger('change')
+    localStorage.setItem('columns', JSON.stringify(columns));
+    let $hidden = $('#filters_hidden');
+    $hidden.clone().attr('style', '').attr('id', 'filters').appendTo('.gridjs-head');
+    const $select = $('#filters select').select2({ placeholder: 'Выберите опции' });
+    $select.val($hidden.val()).trigger('change')
   }
 
   bindSwitchEvents() {
@@ -214,15 +214,15 @@ class TableManager {
       const $input = $(e.currentTarget).find('input');
       if ($input.hasClass('toggle-all-local')) {
         const groupId = $input.attr('id').replace('toggleAll', '').toLowerCase();
-        this.allColumns.filter(c => c.group === groupId && !c.hidden && c.id !== 'species').forEach(c => this.highlightColumn(c.id));
+        this.allColumns.filter((c) => c.group === groupId && !c.hidden && c.id !== 'species').forEach((c) => this.highlightColumn(c.id));
       } else {
         const colId = $input.val();
         if (!$input.prop('checked')) return;
-        this.highlightColumn(colId)
+        this.highlightColumn(colId);
       }
     });
 
-    $('.form-switch').on('mouseleave', () => $('#table-wrapper table td, #table-wrapper table th').removeClass('highlight-column'))
+    $('.form-switch').on('mouseleave', () => $('#table-wrapper table td, #table-wrapper table th').removeClass('highlight-column'));
   }
 
   bindModalEvents() {
@@ -271,18 +271,18 @@ class TableManager {
   }
 
   renderColumnControls() {
-    $('.nav-link').attr('aria-selected', false)
-    $('#main-tab').attr('aria-selected', true).addClass('active')
-    $('#main').addClass('show active')
-    this.groups = ['main', 'eco', 'geo', 'extra']
-    this.groups.forEach(group => {
+    $('.nav-link').attr('aria-selected', false);
+    $('#main-tab').attr('aria-selected', true).addClass('active');
+    $('#main').addClass('show active');
+    this.groups = ['main', 'eco', 'geo', 'extra'];
+    this.groups.forEach((group) => {
       const container = $(`#${group} .tab-pane-content`);
-      const cols = this.allColumns.filter(c => c.group === group && c.name !== 'Вид');
+      const cols = this.allColumns.filter((c) => c.group === group && c.name !== 'Вид');
       const toggleId = `toggleAll${group}`;
 
       container.find('.column-toggle').closest('.form-check').remove();
 
-      cols.forEach(col => {
+      cols.forEach((col) => {
         const label = col.name.replace(' группа', '');
         container.append(`
             <div class="form-check form-switch">
@@ -301,20 +301,20 @@ class TableManager {
       });
     });
 
-    $('#toggleAllGlobal').off('change').on('change', () => {
-      const checked = $('#toggleAllGlobal').prop('checked');
-      $('.column-toggle').prop('checked', checked);
-      $('.toggle-all-local').prop('checked', checked);
-      this.renderTable();
-    });
+    $('#toggleAllGlobal')
+      .off('change')
+      .on('change', () => {
+        const checked = $('#toggleAllGlobal').prop('checked');
+        $('.column-toggle').prop('checked', checked);
+        $('.toggle-all-local').prop('checked', checked);
+        this.renderTable();
+      });
 
     this.syncGlobalToggle();
   }
 
   syncGlobalToggle() {
-    const allChecked = this.groups.every(group =>
-      $(`#toggleAll${group}`).prop('checked')
-    );
+    const allChecked = this.groups.every((group) => $(`#toggleAll${group}`).prop('checked'));
     $('#toggleAllGlobal').prop('checked', allChecked);
   }
 }
