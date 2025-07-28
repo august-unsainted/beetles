@@ -93,7 +93,7 @@ class TableManager {
     let columnsLength = $('#data_table').find('tr:first td').length;
     let actionColumn = { name: 'Действия', sort: false, hidden: false };
     if (storedColumns !== null && storedColumns !== undefined) {
-      storedColumns = JSON.parse(localStorage.getItem('columns'))
+      storedColumns = JSON.parse(localStorage.getItem('columns'));
       if (columnsLength > storedColumns.length) {
         storedColumns.push(actionColumn);
       } else if (columnsLength < storedColumns.length) {
@@ -220,14 +220,13 @@ class TableManager {
 
   bindModalEvents() {
     $('#detailsModal').on('show.bs.modal', function (e) {
-      const button = e.relatedTarget;
-      const rowIndex = $(button).attr('data-row-index');
+      const rowIndex = $(e.relatedTarget).attr('data-row-index');
       const original = manager.beetles[rowIndex];
       const beetle = original.slice();
       beetle.splice(1, 2);
       let children = $('#details_form')
         .find('input, select, textarea')
-        .filter((i, el) => el.id);
+        .filter((_, el) => el.id);
       $.each(children, function (i, child) {
         let value = beetle[i];
         if (!['id', 'name', 'description', 'synonyms'].includes(child.name) && value != '') {
@@ -242,24 +241,24 @@ class TableManager {
       });
     });
 
-    $('#edit_genus, #new_genus').on('select2:select', function (e) {
+    $('#createBeetleModal').on('show.bs.modal', function (e) {
+      $.each($('#createBeetle_form').find('input, select, textarea'), function (_, element) {
+        $(element).val('').trigger('change');
+      });
+    });
+
+    $('#details_genus, #createBeetle_genus').on('select2:select', function (e) {
       const modal = this.id.split('_')[0];
       $(`#${modal}_subgenus`).val('').trigger('change');
     });
 
-    $('#edit_subgenus, #new_subgenus').on('select2:select', function (e) {
+    $('#details_subgenus, #createBeetle_subgenus').on('select2:select', function (e) {
       const modal = this.id.split('_')[0];
       const selectedOption = $(this).find(`option[value="${this.value}"]`)[0];
       if (selectedOption) {
         const genus = selectedOption.getAttribute('data-genus');
         if (genus) $(`#${modal}_genus`).val(genus).trigger('change');
       }
-    });
-
-    $('#createBeetleModal').on('show.bs.modal', function (e) {
-      $.each($('#createBeetle_form').find('input, select, textarea'), function (_, element) {
-        $(element).val('').trigger('change');
-      });
     });
   }
 
@@ -271,7 +270,7 @@ class TableManager {
     this.groups.forEach((group) => {
       const container = $(`#${group} .tab-pane-content`);
       const cols = this.allColumns.filter((c) => c.group === group && c.name !== 'Вид');
-      const toggleId = `toggleAll${group}`;
+      const toggleId = 'toggleAll' + group;
       container.find('.column-toggle').closest('.form-check').remove();
       cols.forEach((col) => {
         const label = col.name.replace(' группа', '');
@@ -283,10 +282,8 @@ class TableManager {
           `);
       });
 
-      const $toggle = $(`#${toggleId}`);
-      $toggle.off('change').on('change', () => {
-        const checked = $toggle.prop('checked');
-        container.find('.column-toggle').prop('checked', checked);
+      $('#' + toggleId).off('change').on('change', function () {
+        container.find('.column-toggle').prop('checked', $(this).prop('checked'));
         this.syncGlobalToggle();
         this.renderTable();
       });
@@ -294,10 +291,8 @@ class TableManager {
 
     $('#toggleAllGlobal')
       .off('change')
-      .on('change', () => {
-        const checked = $('#toggleAllGlobal').prop('checked');
-        $('.column-toggle').prop('checked', checked);
-        $('.toggle-all-local').prop('checked', checked);
+      .on('change', function () {
+        $('.column-toggle, .toggle-all-local').prop('checked', $(this).prop('checked'));
         this.renderTable();
       });
 
