@@ -1,7 +1,30 @@
 <?php
 require_once('connect_db.php');
 
-function get_table($where = ''): string
+function get_modals()
+{
+    $modals = ['details' => 'Детали жужелицы', 'createBeetle' => 'Создать новую жужелицу', 'createGeo' => 'Создать новый пункт'];
+    foreach ($modals as $id => $title) {
+        $form = get_form($id);
+        $id .= 'Modal';
+        $label = $id . 'Label';
+        echo "<div class='modal fade' id='$id' tabindex='-1' aria-labelledby='$label' aria-hidden='true'>
+        <div class='modal-dialog modal-lg'>
+            <div class='modal-content'>
+                <div class='modal-header bg-light'>
+                    <h5 class='modal-title fw-semibold' id='$label'>$title</h5>
+                    <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                </div>
+                $form
+            </div>
+        </div>
+    </div>";
+    }
+}
+
+
+
+function get_table($edit, $where = ''): string
 {
     global $link;
     $query = "SELECT s.id as 'ID', f.name as 'Подсемейство', t.name as 'Триба', g.name as 'Род', sg.name as 'Подрод', s.name as 'Вид', s.synonyms as 'Синонимы',
@@ -31,7 +54,7 @@ function get_table($where = ''): string
         foreach ($specie as $specie_td) {
             $result .= "<td>$specie_td</td>";
         }
-        $result .= "</tr>";
+        $result .= $edit ? "<td><button class='btn btn-secondary btn-sm view-details-btn' data-bs-toggle='modal' data-bs-target='#detailsModal' data-row-index='$specie[0]'>Подробнее</button></td></tr>" : '</tr>';
     }
     $result .= '</tbody></table>';
     return $result;
@@ -84,6 +107,23 @@ function get_selects($row_name, $modal, $selects, $multiple = false): string
 
 function get_form($name): string
 {
+    if ($name == 'createGeo') {
+        return '<form id="createGeoForm" action="php/createPoint.php" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="point" class="form-label">Название</label>
+                            <input type="text" class="form-control" id="pointGeo" name="point" required>
+                        </div>
+                        <div class="mb-3" id="regionSelectGroup">
+                            <label for="regionSelect" class="form-label">Район</label>' . get_select('regionsGeo', 'regions') . '
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+                    </div>
+                </form>';
+    }
     $selects = get_selects('Таксономия', $name, ["genus" => 'Род', 'subgenus' => 'Подрод']);
     $id = $name . '_name';
     $synonyms_id = $name . '_synonyms';
@@ -110,9 +150,9 @@ function get_form($name): string
     ]);
     $multiple_selects = get_selects('География', $name, ['regions' => 'Районы сбора', 'points' => 'Точки сбора'], true);
     $desc_id = $name . "_description";
-    $action = $name == 'edit' ? 'edit' : 'create';
+    $action = $name == 'details' ? 'edit' : 'create';
     $range_selects = str_replace('col-md-4', 'col-md-6', $range_selects);
-    $footer = $name == 'edit' ? "
+    $footer = $name == 'details' ? "
               <button name='action' value='delete' class='btn btn-danger btn-sm me-auto'>Удалить</button>
               <button type='button' class='btn btn-secondary btn-sm' data-bs-dismiss='modal'>Закрыть</button>
               <button name='action' value='apply' class='btn btn-primary btn-sm'>Сохранить</button>" : "<button type='button' class='btn btn-secondary btn-sm' data-bs-dismiss='modal'>Отмена</button>
@@ -139,7 +179,7 @@ function get_form($name): string
             </div>";
 }
 
-function get_columns_fieldset()
+function get_columns_fieldset($edit)
 {
     echo "<fieldset class='w-100 w-md-50' id='chooseColumns'>
         <legend class='fs-6 text-muted mb-2'>Признаки</legend>
@@ -154,7 +194,7 @@ function get_columns_fieldset()
     echo "</ul><div class='tab-content mt-2' id='columnTabsContent'>";
     foreach ($tabs as $name => $data) {
         $name = mb_strtolower($name);
-        $btn = $data == "geo" ? "<button type='button' class='btn btn-outline-primary btn-sm btn-create-geo' data-bs-toggle='modal' data-bs-target='#createGeoModal'>+ Создать пункт</button>" : "";
+        $btn = $data == "geo" && $edit ? "<button type='button' class='btn btn-outline-primary btn-sm btn-create-geo' data-bs-toggle='modal' data-bs-target='#createGeoModal'>+ Создать пункт</button>" : "";
         echo "<div class='tab-pane fade' id='$data' role='tabpanel' aria-labelledby='$data-tab'>
                 <div class='tab-pane-content'>
                     <div class='form-check form-switch'>

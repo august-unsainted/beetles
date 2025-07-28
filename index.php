@@ -1,6 +1,17 @@
 <?php
 require_once('php/connect_db.php');
 require_once('php/utils.php');
+session_start();
+$edit = $_SESSION['edit'] ?? false;
+
+if (isset($_POST['password'])) {
+    $password = $_POST['password'];
+    $result = mysqli_query($link, 'SELECT * FROM config');
+    $hash = mysqli_fetch_all($result)[0][0];
+    if (password_verify($password, $hash)) {
+        $_SESSION['edit'] = true;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -10,7 +21,7 @@ require_once('php/utils.php');
     <!-- Установка кодировки и адаптивности страницы -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивная таблица жужелиц</title>
+    <title>Жуки-жужелицы (Coleoptera Carabidae) Республики Бурятия</title>
     <!-- Подключение стилей Bootstrap и Grid.js для оформления таблицы -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
@@ -25,23 +36,25 @@ require_once('php/utils.php');
 <body>
     <!-- Основной контейнер страницы с отступами -->
     <div class="container-fluid py-4 px-3">
-        <!-- Карточка с контентом -->
         <div class="card border-0">
             <div class="card-body">
                 <section class="mb-4">
                     <div
                         class="d-flex flex-column flex-md-row px-0 justify-content-between align-items-start gap-3 w-100">
-
-                        <!-- Заголовок и кнопка -->
                         <div class="w-100 w-md-50">
-                            <h1 class="fw-bold text-primary mb-3">Интерактивная таблица жужелиц</h1>
-                            <button type="button" class="btn btn-primary w-100 w-md-auto" style="min-width: 180px;"
-                                data-bs-toggle="modal" data-bs-target="#createBeetleModal">
-                                + Создать жужелицу
-                            </button>
+                            <h1 class="fw-bold text-primary mb-3">Жуки-жужелицы (Coleoptera, Carabidae) Республики
+                                Бурятия</h1>
+                            <h6 class="fw-bold mb-3">По книге «Жуки-жужелицы (Coleoptera, Carabidae) Бурятии» (Л.Ц.
+                                Хобракова, В.Г. Шиленков, Р.Ю. Дудко)</h1>
+                                <?= $edit ? '<button type="button" class="btn btn-primary w-100 w-md-auto" style="min-width: 180px;"
+                                    data-bs-toggle="modal" data-bs-target="#createBeetleModal">
+                                    + Создать жужелицу
+                                </button>' : '<button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#allowEdit">
+                                Редактировать
+                            </button>' ?>
                         </div>
 
-                        <?= get_columns_fieldset() ?>
+                        <?= get_columns_fieldset($edit) ?>
                     </div>
                 </section>
                 <div id="filters_hidden" style="display: none">
@@ -52,74 +65,37 @@ require_once('php/utils.php');
                         <button class="btn btn-secondary btn-sm">Применить</button>
                     </form>
                 </div>
-                <?= get_table(isset($_GET['regions']) ? 'WHERE p.region IN (' . join(', ', $_GET['regions']) . ')' : '') ?>
+                <?= get_table($edit, isset($_GET['regions']) ? 'WHERE p.region IN (' . join(', ', $_GET['regions']) . ')' : '') ?>
 
                 <!-- Основная таблица -->
                 <div id="table-wrapper" class="rounded"></div>
             </div>
         </div>
-
     </div>
 
-    <!-- Модальное окно: Создать район/пункт -->
-    <div class="modal fade" id="createGeoModal" tabindex="-1" aria-labelledby="createGeoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="allowEdit" tabindex="-1" aria-labelledby="allowEditLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="createGeoModalLabel">Создать новый элемент</h5>
+                    <h5 class="modal-title" id="allowEditLabel">Получить доступ к редактированию</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="createGeoForm" action="php/createPoint.php" method="post">
+                <form id="allowEditForm" method="post">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="point" class="form-label">Название</label>
-                            <input type="text" class="form-control" id="pointGeo" name="point" required>
-                        </div>
-
-                        <div class="mb-3" id="regionSelectGroup">
-                            <label for="regionSelect" class="form-label">Район</label>
-                            <?= get_select('regionsGeo', 'regions') ?>
+                            <label for="point" class="form-label">Пароль</label>
+                            <input type="text" class="form-control" id="password" name="password" required>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Отмена</button>
-                        <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Проверить</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-
-    <!-- Модальное окно для просмотра и редактирования деталей жужелицы -->
-    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-semibold" id="detailsModalLabel">Детали жужелицы</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <?= get_form("edit") ?>
-            </div>
-        </div>
-    </div>
-
-    <!-- Модальное окно для создания новой жужелицы -->
-    <div class="modal fade" id="createBeetleModal" tabindex="-1" aria-labelledby="createBeetleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-semibold" id="createBeetleModalLabel">Создать новую жужелицу</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <?= get_form("new") ?>
-
-            </div>
-        </div>
-    </div>
-
-
+    <?= $edit ? get_modals() : '' ?>
     <!-- Подключение библиотек Grid.js и Bootstrap для функциональности таблицы и модальных окон -->
     <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -134,6 +110,7 @@ require_once('php/utils.php');
                 $('#filters select').val(region).trigger('change');
                 $('#filters_hidden').val(region)
             };
+            console.log('Длина', $('#data_table').rows[0].cells.length)
         });
 
         function resetFilters() {

@@ -8,12 +8,6 @@ class TableManager {
     this.name = name;
   }
 
-  detailsFormatter = (_, row) => {
-    const originalRowData = row.cells.map((c) => c.data);
-    const rowIndex = this.beetles.findIndex((b) => b[0] === originalRowData[0]);
-    return gridjs.html(`<button class="btn btn-secondary btn-sm view-details-btn" data-bs-toggle="modal" data-bs-target="#detailsModal" data-row-index="${rowIndex}">Подробнее</button>`);
-  };
-
   init() {
     this.initSelect2();
     this.syncColumnsState();
@@ -94,7 +88,7 @@ class TableManager {
       const row = [];
       $(tr)
         .find('td')
-        .each((_, td) => row.push(td.innerText.trim()));
+        .each((_, td) => {row.push(td.querySelector('button') ? td.querySelector('button') : td.innerText.trim()); });
       this.beetles.push(row);
     });
   }
@@ -104,7 +98,6 @@ class TableManager {
       // localStorage.clear()
       const storedColumns = JSON.parse(localStorage.getItem('columns'));
       if (storedColumns) {
-        storedColumns[15].formatter = this.detailsFormatter;
         this.allColumns = storedColumns;
         return;
       }
@@ -141,7 +134,8 @@ class TableManager {
         hidden: (type == 'geo' && ecoColumns.includes(column)) || (type == 'eco' && geoColumns.includes(column)) || ['ID', 'Синонимы', 'Распространение'].includes(column[0]),
       });
     }
-    columnsConfig.push({ name: 'Действия', sort: false, hidden: false, formatter: this.detailsFormatter });
+    
+    columnsConfig.push({ name: 'Действия', sort: false, hidden: false });
 
     this.allColumns = columnsConfig;
   }
