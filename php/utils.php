@@ -108,7 +108,7 @@ function get_selects($row_name, $modal, $selects, $multiple = false): string
 function get_form($name): string
 {
     if ($name == 'createGeo') {
-        return '<form id="createGeoForm" action="php/createPoint.php" method="post">
+        return '<form id="createGeoForm" method="post">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="point" class="form-label">Название</label>

@@ -2,7 +2,6 @@
 require_once('php/connect_db.php');
 require_once('php/utils.php');
 session_start();
-$edit = $_SESSION['edit'] ?? false;
 
 if (isset($_POST['password'])) {
     $password = $_POST['password'];
@@ -12,6 +11,14 @@ if (isset($_POST['password'])) {
         $_SESSION['edit'] = true;
     }
 }
+
+if (isset($_POST['point'])) {
+    $query = "INSERT INTO points (name, region) VALUES ('$_POST[point]', $_POST[regions])";
+    mysqli_query($link, $query);
+}
+
+$edit = $_SESSION['edit'] ?? false;
+
 ?>
 
 <!DOCTYPE html>
@@ -35,6 +42,9 @@ if (isset($_POST['password'])) {
 
 <body>
     <!-- Основной контейнер страницы с отступами -->
+    <form action="php/logout.php" method="post">
+        <button>Выход</button>
+    </form>
     <div class="container-fluid py-4 px-3">
         <div class="card border-0">
             <div class="card-body">
@@ -101,7 +111,7 @@ if (isset($_POST['password'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/TableManager.js"></script>
     <script>
-        const manager = new TableManager('eco');
+        const manager = new TableManager();
         $(document).ready(() => {
             manager.init()
             let params = new URLSearchParams(window.location.search);
@@ -110,7 +120,6 @@ if (isset($_POST['password'])) {
                 $('#filters select').val(region).trigger('change');
                 $('#filters_hidden').val(region)
             };
-            console.log('Длина', $('#data_table').rows[0].cells.length)
         });
 
         function resetFilters() {
