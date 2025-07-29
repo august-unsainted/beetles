@@ -79,6 +79,15 @@ h1 {
   border: var(--bs-border-width) solid var(--bs-border-color);
 }
 
+.select2-search__field {
+  margin: 10px 13px !important;
+  font-size: 14px !important;
+}
+
+.select2-selection, .gridjs-search-input {
+  height: 42px !important;
+}
+
 /* Стили таблицы */
 .gridjs-th {
   padding: 6px !important;
@@ -224,4 +233,71 @@ legend {
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
   flex-shrink: 0;
+}
+
+/* Улучшенное оформление заголовка и подзаголовка */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0d6efd;
+  margin-bottom: 0.5rem;
+}
+
+.page-header p {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 0;
+}
+
+/* Стили для кнопок управления режимом */
+.edit-mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.btn-edit-mode {
+  min-width: 180px;
+}
+
+/* Стили для режима редактирования */
+.invalid-password {
+  border-color: #dc3545 !important;
+  animation: shake 0.5s;
+}
+
+.password-error {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: none;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
 }

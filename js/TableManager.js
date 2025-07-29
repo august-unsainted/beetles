@@ -180,7 +180,7 @@ class TableManager {
     localStorage.setItem('columns', JSON.stringify(columns));
     let $hidden = $('#filters_hidden');
     $hidden.clone().attr('style', '').attr('id', 'filters').appendTo('.gridjs-head');
-    const $select = $('#filters select').select2({ placeholder: 'Выберите опции' });
+    const $select = $('#filters select').select2({ placeholder: 'Выберите опции…' });
     $select.val($hidden.val()).trigger('change');
   }
 
@@ -220,7 +220,7 @@ class TableManager {
 
   bindModalEvents() {
     $('#detailsModal').on('show.bs.modal', function (e) {
-      const rowIndex = $(e.relatedTarget).attr('data-row-index');
+      const rowIndex = $(e.relatedTarget).attr('data-row-index') - 1;
       const original = manager.beetles[rowIndex];
       const beetle = original.slice();
       beetle.splice(1, 2);
@@ -270,7 +270,6 @@ class TableManager {
     this.groups.forEach((group) => {
       const container = $(`#${group} .tab-pane-content`);
       const cols = this.allColumns.filter((c) => c.group === group && c.name !== 'Вид');
-      const toggleId = 'toggleAll' + group;
       container.find('.column-toggle').closest('.form-check').remove();
       cols.forEach((col) => {
         const label = col.name.replace(' группа', '');
@@ -282,17 +281,15 @@ class TableManager {
           `);
       });
 
-      $('#' + toggleId).off('change').on('change', function () {
-        container.find('.column-toggle').prop('checked', $(this).prop('checked'));
+      $('#toggleAll' + group).off('change').on('change', (e) => {
+        container.find('.column-toggle').prop('checked', $(e.currentTarget).prop('checked'));
         this.syncGlobalToggle();
         this.renderTable();
       });
     });
 
-    $('#toggleAllGlobal')
-      .off('change')
-      .on('change', function () {
-        $('.column-toggle, .toggle-all-local').prop('checked', $(this).prop('checked'));
+    $('#toggleAllGlobal').off('change').on('change', (e) => {
+        $('.column-toggle, .toggle-all-local').prop('checked', $(e.currentTarget).prop('checked'));
         this.renderTable();
       });
 
