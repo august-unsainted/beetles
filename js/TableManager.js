@@ -76,6 +76,7 @@ class TableManager {
   }
 
   loadData() {
+    this.data = {};
     this.beetles = [];
     $('#data_table tbody tr').each((_, tr) => {
       const row = [];
@@ -85,6 +86,7 @@ class TableManager {
           row.push(td.querySelector('button') ? td.querySelector('button') : td.innerText.trim());
         });
       this.beetles.push(row);
+      this.data[parseInt(row[0])] = row; 
     });
   }
 
@@ -104,12 +106,12 @@ class TableManager {
     }
     let columnsConfig = [];
     let baseColumns = [
-      ['ID', 'id', ''],
+      ['ID', 'id', 'none'],
       ['Подсемейство', 'family', 'main'],
       ['Триба', 'tribe', 'main'],
       ['Род', 'genus', 'main'],
       ['Подрод', 'subgenus', 'main'],
-      ['Вид', 'name', ''],
+      ['Вид', 'name', 'none'],
       ['Синонимы', 'synonyms', 'extra'],
     ];
     let geoColumns = [
@@ -131,7 +133,7 @@ class TableManager {
       columnsConfig.push({
         name: column[0],
         id: column[1],
-        group: column[2] || (inGeo ? 'geo' : 'eco'),
+        group: (inGeo ? 'geo' : 'eco') || column[2],
         hidden: inGeo || ['ID', 'Синонимы', 'Распространение'].includes(column[0]),
       });
     }
@@ -220,8 +222,8 @@ class TableManager {
 
   bindModalEvents() {
     $('#detailsModal').on('show.bs.modal', function (e) {
-      const rowIndex = $(e.relatedTarget).attr('data-row-index') - 1;
-      const original = manager.beetles[rowIndex];
+      const rowIndex = $(e.relatedTarget).attr('data-row-index');
+      const original = manager.data[parseInt(rowIndex)];
       const beetle = original.slice();
       beetle.splice(1, 2);
       let children = $('#details_form')
@@ -269,7 +271,7 @@ class TableManager {
     this.groups = ['main', 'eco', 'geo', 'extra'];
     this.groups.forEach((group) => {
       const container = $(`#${group} .tab-pane-content`);
-      const cols = this.allColumns.filter((c) => c.group === group && c.name !== 'Вид');
+      const cols = this.allColumns.filter((c) => c.group === group && !['Вид', 'ID'].includes(c.name));
       container.find('.column-toggle').closest('.form-check').remove();
       cols.forEach((col) => {
         const label = col.name.replace(' группа', '');

@@ -21,7 +21,7 @@ if (isset($_POST['password']) || isset($_POST['code_word'])) {
         array_push($alert, $key == 'password' ? 'Неверный пароль' : 'Неверное кодовое слово');
     }
     if (isset($alert)) {
-        echo "<div class='alert alert-$alert[0] d-flex align-items-center m-4' role='alert' style='width: max-content; margin-bottom: -24px !important;'>
+        echo "<div class='alert alert-$alert[0] d-flex align-items-center m-4' role='alert' style='width: max-content; margin-bottom: -12px !important;'>
             <svg class='bi flex-shrink-0 me-2' width='24' height='24' role='img' aria-label='Warning:'><use xlink:href='#$alert[1]'/></svg>
             <div>
                 $alert[2]!

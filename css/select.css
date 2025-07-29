@@ -79,7 +79,7 @@ h1 {
   border: var(--bs-border-width) solid var(--bs-border-color);
 }
 
-.select2-search__field {
+#regions_select .select2-search__field {
   margin: 10px 13px !important;
   font-size: 14px !important;
 }

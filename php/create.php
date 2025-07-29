@@ -26,6 +26,6 @@ if (isset($_POST)) {
         mysqli_query($link, "INSERT INTO species_points VALUES " . join(', ', $points) . '<br>');
     }
 }
-header('Location: /index.php');
+header('Location: index.php');
 
 ?>

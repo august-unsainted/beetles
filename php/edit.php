@@ -38,7 +38,7 @@ if (isset($_POST)) {
         $params = [];
         foreach ($_POST as $key => $value) {
             if (!in_array($key, ['id', 'regions', 'points', 'action'])) {
-                if (str_ends_with($key, 's') && !in_array($key, ['genus', 'subgenus'])) {
+                if (str_ends_with($key, 's') && !in_array($key, ['genus', 'subgenus', 'synonyms'])) {
                     $key = substr($key, 0, strlen($key) - 1);
                 }
                 $value = mysqli_real_escape_string($link, $value);
@@ -54,6 +54,6 @@ if (isset($_POST)) {
         mysqli_query($link, "DELETE FROM species_points WHERE beetle = $_POST[id]");
     }
 }
-header('Location: /index.php');
+header('Location: index.php');
 
 ?>
